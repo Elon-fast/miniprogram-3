@@ -1,0 +1,66 @@
+<!--module2/index.wxml - 智能排座引擎模块-->
+<view class="container">
+  <view class="header">
+    <text class="title">{{title}}</text>
+    <button class="generate-btn" bindtap="reGenerate" size="mini" wx:if="{{showSeatTable}}">重新生成</button>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 座位表 -->
+  <view class="content" wx:if="{{!loading && showSeatTable && seatTable}}">
+    <!-- 统计信息 -->
+    <view class="stats-card" wx:if="{{seatStats}}">
+      <view class="stats-item">
+        <text class="stats-label">总座位数:</text>
+        <text class="stats-value">{{seatStats.totalSeats}}</text>
+      </view>
+      <view class="stats-item">
+        <text class="stats-label">已使用:</text>
+        <text class="stats-value">{{seatStats.usedSeats}}</text>
+      </view>
+      <view class="stats-item">
+        <text class="stats-label">空座位:</text>
+        <text class="stats-value">{{seatStats.emptySeats}}</text>
+      </view>
+    </view>
+
+    <!-- 座位表 -->
+    <view class="seat-table-container">
+      <view class="seat-table-title">座位表 ({{rows}}行 × {{cols}}列)</view>
+      <view class="seat-table">
+        <view class="seat-row" wx:for="{{seatTable}}" wx:key="index" wx:for-item="row">
+          <view 
+            class="seat-cell {{item ? 'occupied' : 'empty'}}" 
+            wx:for="{{row}}" 
+            wx:key="id"
+            wx:for-item="student"
+          >
+            <text class="seat-name" wx:if="{{student}}">
+              {{student.name}}
+            </text>
+            <text class="seat-empty" wx:else>空</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 说明 -->
+    <view class="info-card">
+      <view class="info-title">💡 排座说明</view>
+      <view class="info-content">
+        <text>• 算法综合考虑学科互补、性格相容、避免干扰等因素</text>
+        <text>• 点击"重新生成"可生成不同的座位安排方案</text>
+        <text>• 空座位表示该位置未安排学生</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty" wx:if="{{!loading && !showSeatTable}}">
+    <text>暂无数据</text>
+  </view>
+</view>

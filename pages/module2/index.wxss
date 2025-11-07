@@ -1,0 +1,159 @@
+/* module2/index.wxss - 智能排座引擎模块样式 */
+.container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 30rpx;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.title {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.generate-btn {
+  background-color: #1890ff;
+  color: #fff;
+  border-radius: 8rpx;
+}
+
+.loading {
+  text-align: center;
+  padding: 100rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.stats-card {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx 30rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+  display: flex;
+  justify-content: space-around;
+}
+
+.stats-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.stats-label {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.stats-value {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #1890ff;
+}
+
+.seat-table-container {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+}
+
+.seat-table-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 24rpx;
+  text-align: center;
+}
+
+.seat-table {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.seat-row {
+  display: flex;
+  gap: 12rpx;
+  justify-content: center;
+}
+
+.seat-cell {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx solid #e8e8e8;
+  box-sizing: border-box;
+}
+
+.seat-cell.occupied {
+  background-color: #e6f7ff;
+  border-color: #1890ff;
+}
+
+.seat-cell.empty {
+  background-color: #f5f5f5;
+  border-color: #d9d9d9;
+}
+
+.seat-name {
+  font-size: 24rpx;
+  color: #333;
+  text-align: center;
+  word-break: break-all;
+  padding: 8rpx;
+}
+
+.seat-empty {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.info-card {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+}
+
+.info-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+
+.info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.info-content text {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.6;
+}
+
+.empty {
+  text-align: center;
+  padding: 100rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}

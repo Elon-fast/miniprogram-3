@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "班级生态评估",
+  "usingComponents": {
+    "ec-canvas": "../../components/ec-canvas/ec-canvas"
+  }
+}
+

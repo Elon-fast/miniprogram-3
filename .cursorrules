@@ -1,0 +1,59 @@
+# .cursorrules for Smart_Grade_System Teacher Mini-Program
+
+# 1. 项目核心背景与目标 (Project Context & Goal)
+project.context: >
+  本项目是一个名为"Smart_Grade_System"的智能教育管理系统的一部分，当前聚焦于开发**教师端微信小程序**。
+  核心目标是利用数据分析与算法，帮助小学教师进行科学的班级管理，超越传统的成绩分析，关注学生的个性化发展（学习风格、心理特质、社交关系）。
+  核心功能模块是：a) 班级生态评估（社会网络分析）；b) 智能排座引擎（多参数优化）；c) 班委胜任力模型（决策树推荐）。
+
+# 2. 技术栈与规范 (Tech Stack & Conventions)
+tech.stack: 微信小程序原生框架(JavaScript/WXML/WXSS)
+code.convention: >
+  - 页面文件存放于 `pages/` 目录下，每个页面包含 `.js`, `.wxml`, `.wxss`, `.json` 四个文件。
+  - 可复用自定义组件存放于 `components/` 目录。
+  - 工具函数和通用算法（如社会网络分析、排座算法、决策树实现）集中放在 `utils/` 和 `models/` 目录。
+  - 变量和函数名使用小驼峰命名法。
+  - WXML中使用数据绑定 `{{}}` 和逻辑控制（`wx:if`, `wx:for`）。
+  - 样式优先使用Flex布局，尺寸单位优先使用 `rpx`。
+  - 使用小程序云开发或已有的后端API进行数据交互[1,2,6](@ref)。在项目前期先使用mock数据进行替代
+
+# 3. 核心模块功能逻辑描述 (Core Module Specifications)
+# 3.1 班级生态评估 (Class Ecology Assessment)
+module.class_ecology: >
+  - **目标**：通过问卷数据、互动数据等，构建班级学生的社交网络，识别关键节点（如意见领袖、孤立学生）。
+  - **实现提示**：在`utils/`或`models/`下创建 `socialNetworkAnalysis.js` 模块。该模块应包含：
+      * 数据预处理函数，将问卷结果（如"你经常和哪些同学一起学习/玩耍？"）转换为邻接矩阵或图数据。
+      * 计算节点的中心性指标（如度中心性、中介中心性）的函数，以识别关键学生。
+      * 提供可视化建议，如使用关系图或热力图在WXML中展示（可考虑使用`wx:for`渲染节点和边）。
+  - **AI提示词示例**："请为 `utils/socialNetworkAnalysis.js` 编写一个函数，计算一组节点关系数据中每个节点的度中心性。"
+
+# 3.2 智能排座引擎 (Intelligent Seat Arrangement Engine)
+module.seat_arrangement: >
+  - **目标**：允许教师输入约束条件（如"学科互补"、"性格相容"、"避免干扰"），自动生成优化的座位表。
+  - **实现提示**：在`utils/`或`models/`下创建 `seatArrangementAlgorithm.js` 模块。
+      * 将学生抽象为对象，包含属性如：学科成绩（对象）、性格类型（如MBTI或自定义维度）、既往互动记录。
+      * 算法核心是定义一个**成本函数**或**适配度函数**，该函数综合评估不同配对在各项约束条件下的得分。
+      * 可采用启发式算法（如贪心算法）进行初步排座。
+      * 结果应是一个学生ID的二维数组（模拟行列），并能在新页面中清晰展示。
+  - **AI提示词示例**："在 `utils/seatArrangementAlgorithm.js` 中，帮我写一个函数，它接收两个学生对象，根据他们的学科成绩互补性（如数学好配语文弱）返回一个匹配分数。"
+
+# 3.3 班委胜任力模型 (Class Leader Competency Model)
+module.leader_selection: >
+  - **目标**：基于学生的行为数据（如课堂表现、责任感）、心理测评结果，使用决策树等算法推荐最适合的班委岗位。
+  - **实现提示**：在`utils/`或`models/`下创建 `classLeaderRecommendation.js` 模块。
+      * 定义班委岗位（如班长、学习委员、心理委员）及每个岗位所需的核心能力（如领导力、同理心、责任心）。
+      * 构建训练数据（可以基于规则预先定义一批样本数据），使用决策树算法（如CART）或简单的规则引擎来建立预测模型。
+      * 为每个学生生成岗位适配度报告。
+  - **AI提示词示例**："请为 `components/leader-recommendation` 组件编写WXML结构，用于展示一个学生适合各个班委岗位的适配度百分比列表。"
+
+# 4. 数据与隐私 (Data & Privacy)
+data.privacy: >
+  - 所有涉及学生的数据（成绩、心理测评、社交关系）均为模拟数据或已脱敏数据，仅用于毕业设计演示。
+  - 在代码注释和文档中明确说明此点。使用 `mock/data.js` 来生成模拟数据。
+
+# 5. 对AI的额外提示 (Additional Instructions for AI)
+ai.instructions: >
+  - 当被要求生成页面或功能时，请优先考虑微信小程序的原生语法和API，保持代码简洁、模块化。
+  - 生成的代码请附带清晰的注释，说明关键步骤。
+  - 如果需求描述不够清晰，请主动询问或基于上述上下文做出合理假设。
+  - 在实现复杂算法时，可以先提供简化版的实现，并注明可优化的空间[5,6](@ref)。
