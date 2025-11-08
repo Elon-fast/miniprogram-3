@@ -665,3 +665,234 @@
   font-weight: 600;
   color: #52c41a;
 }
+
+/* 维度详细数据样式 */
+.dimensions-detail-section {
+  margin-top: 30rpx;
+  padding-top: 30rpx;
+  border-top: 2rpx solid #f0f0f0;
+}
+
+.dimensions-chart-container {
+  width: 100%;
+  height: 500rpx;
+  background-color: #fafafa;
+  border-radius: 12rpx;
+  margin-bottom: 24rpx;
+  overflow: hidden;
+}
+
+.dimensions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.dimension-item {
+  padding: 20rpx;
+  background-color: #fafafa;
+  border-radius: 12rpx;
+  border-left: 4rpx solid #1890ff;
+}
+
+.dimension-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.dimension-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.dimension-status-badge {
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+}
+
+.dimension-status-badge.normal {
+  background-color: #f6ffed;
+  color: #52c41a;
+  border: 1rpx solid #b7eb8f;
+}
+
+.dimension-status-badge.warning {
+  background-color: #fff7e6;
+  color: #faad14;
+  border: 1rpx solid #ffe58f;
+}
+
+.dimension-status-badge.danger {
+  background-color: #fff1f0;
+  color: #ff4d4f;
+  border: 1rpx solid #ffccc7;
+}
+
+.dimension-scores {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  font-size: 26rpx;
+}
+
+.score-label, .threshold-label {
+  color: #666;
+}
+
+.score-value {
+  color: #1890ff;
+  font-weight: 600;
+  margin-right: 16rpx;
+}
+
+.threshold-value {
+  color: #999;
+}
+
+/* 成员列表样式 */
+.members-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 8rpx;
+}
+
+.member-name {
+  padding: 8rpx 16rpx;
+  background-color: #e6f7ff;
+  border: 1rpx solid #91d5ff;
+  border-radius: 8rpx;
+  font-size: 26rpx;
+  color: #1890ff;
+  cursor: pointer;
+}
+
+.member-name:active {
+  background-color: #bae7ff;
+}
+
+/* 学生详情弹窗样式 */
+.student-detail-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  width: 90%;
+  max-height: 80%;
+  background-color: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.modal-close {
+  font-size: 48rpx;
+  color: #999;
+  line-height: 1;
+  padding: 0 10rpx;
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 30rpx;
+}
+
+.student-dimensions {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.dimension-detail-item {
+  padding: 20rpx;
+  background-color: #fafafa;
+  border-radius: 12rpx;
+  border-left: 4rpx solid #1890ff;
+}
+
+.dimension-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.dimension-detail-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.dimension-detail-status-badge {
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+}
+
+.dimension-detail-status-badge.normal {
+  background-color: #f6ffed;
+  color: #52c41a;
+  border: 1rpx solid #b7eb8f;
+}
+
+.dimension-detail-status-badge.warning {
+  background-color: #fff7e6;
+  color: #faad14;
+  border: 1rpx solid #ffe58f;
+}
+
+.dimension-detail-status-badge.danger {
+  background-color: #fff1f0;
+  color: #ff4d4f;
+  border: 1rpx solid #ffccc7;
+}
+
+.dimension-detail-scores {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  font-size: 26rpx;
+}
+
+.detail-score-label, .detail-threshold-label {
+  color: #666;
+}
+
+.detail-score-value {
+  color: #1890ff;
+  font-weight: 600;
+  margin-right: 16rpx;
+}
+
+.detail-threshold-value {
+  color: #999;
+}
