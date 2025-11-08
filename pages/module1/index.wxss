@@ -399,3 +399,269 @@
   line-height: 1.6;
   flex: 1;
 }
+
+/* 心理评估样式 */
+.psychology-card {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+  margin-bottom: 24rpx;
+}
+
+.psychology-overview {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  margin-bottom: 20rpx;
+}
+
+.atmosphere-badge {
+  padding: 20rpx 32rpx;
+  border-radius: 12rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 160rpx;
+}
+
+.atmosphere-badge.normal {
+  background-color: #e6f7ff;
+  border: 2rpx solid #1890ff;
+}
+
+.atmosphere-badge.positive {
+  background-color: #f6ffed;
+  border: 2rpx solid #52c41a;
+}
+
+.atmosphere-badge.concern {
+  background-color: #fff7e6;
+  border: 2rpx solid #faad14;
+}
+
+.atmosphere-label {
+  font-size: 24rpx;
+  color: #666;
+  margin-bottom: 8rpx;
+}
+
+.atmosphere-value {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.psychology-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  flex: 1;
+}
+
+.psychology-stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.psychology-stat-item .stat-label {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.psychology-stat-item .stat-value {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1890ff;
+}
+
+.concern-dimensions {
+  padding-top: 20rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.concern-title {
+  font-size: 26rpx;
+  color: #666;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.dimension-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.dimension-tag {
+  padding: 8rpx 16rpx;
+  background-color: #fff7e6;
+  border: 1rpx solid #faad14;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  color: #fa8c16;
+}
+
+/* 小团体分析样式 */
+.group-analysis-card {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+  margin-bottom: 24rpx;
+}
+
+.concern-groups-section {
+  margin-bottom: 30rpx;
+}
+
+.concern-groups-header {
+  margin-bottom: 20rpx;
+}
+
+.concern-groups-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #fa8c16;
+}
+
+.psychology-chart-container {
+  width: 100%;
+  height: 400rpx;
+  background-color: #fafafa;
+  border-radius: 12rpx;
+  margin-bottom: 24rpx;
+  overflow: hidden;
+}
+
+.group-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.group-item {
+  padding: 24rpx;
+  border-radius: 12rpx;
+  border-left: 4rpx solid #1890ff;
+}
+
+.group-item.concern {
+  background-color: #fff7e6;
+  border-left-color: #faad14;
+}
+
+.group-item.normal {
+  background-color: #f6ffed;
+  border-left-color: #52c41a;
+}
+
+.group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.group-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.group-member-count {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.group-status-badge {
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+}
+
+.group-status-badge.normal {
+  background-color: #e6f7ff;
+  color: #1890ff;
+}
+
+.group-status-badge.warning {
+  background-color: #fff7e6;
+  color: #fa8c16;
+}
+
+.group-members {
+  margin-bottom: 12rpx;
+}
+
+.members-label {
+  font-size: 26rpx;
+  color: #666;
+  margin-right: 8rpx;
+}
+
+.members-names {
+  font-size: 26rpx;
+  color: #333;
+}
+
+.group-problems {
+  margin-bottom: 12rpx;
+}
+
+.problems-label {
+  font-size: 26rpx;
+  color: #666;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.problem-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+}
+
+.problem-tag {
+  padding: 6rpx 12rpx;
+  background-color: #fff1f0;
+  border: 1rpx solid #ffccc7;
+  border-radius: 6rpx;
+  font-size: 24rpx;
+  color: #ff4d4f;
+}
+
+.group-reason {
+  padding-top: 12rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.reason-label {
+  font-size: 26rpx;
+  color: #666;
+  font-weight: 600;
+  margin-right: 8rpx;
+}
+
+.reason-text {
+  font-size: 26rpx;
+  color: #333;
+  line-height: 1.6;
+}
+
+.normal-groups-section {
+  margin-top: 30rpx;
+  padding-top: 30rpx;
+  border-top: 2rpx solid #f0f0f0;
+}
+
+.normal-groups-header {
+  margin-bottom: 20rpx;
+}
+
+.normal-groups-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #52c41a;
+}

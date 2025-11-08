@@ -2,6 +2,7 @@
 import { get } from '../../utils/api.js';
 import { analyzeClassEcology } from '../../utils/socialNetworkAnalysis.js';
 import { buildGraphFromQuestionnaire } from '../../utils/networkGraphRenderer.js';
+import { assessClassPsychology, findConnectedComponents, analyzeAllGroups } from '../../utils/psychologicalAssessment.js';
 import * as echarts from '../../components/ec-canvas/echarts';
 
 Page({
@@ -16,8 +17,14 @@ Page({
     showHelpModal: false, // 显示帮助说明弹窗
     selectedNodeInfo: null, // 选中的节点信息
     showNodeModal: false, // 显示节点详情弹窗
+    classPsychology: null, // 班级整体心理状态
+    groupAnalysis: null, // 小团体分析结果
+    concernGroups: [], // 需要关注的小团体
     ec: {
-      onInit: null // ECharts初始化函数
+      onInit: null // ECharts初始化函数（关系图）
+    },
+    ecPsychology: {
+      onInit: null // ECharts初始化函数（心理状态图）
     }
   },
 
@@ -71,10 +78,11 @@ Page({
         
         console.log('班级生态分析完成:', analysisResult);
         console.log('关系图数据:', graphData);
-        console.log('ECharts配置:', echartsOption);
         
-        // 5. 设置ECharts初始化函数
-        // 注意：需要将echartsOption保存到this上，因为onInit函数会在组件ready时调用
+        // 5. 加载心理测评数据并分析
+        await this.loadAndAnalyzePsychology(graphData, analysisResult);
+        
+        // 6. 设置ECharts初始化函数
         this.echartsOption = echartsOption;
         
         this.setData({
@@ -292,6 +300,173 @@ Page({
       console.error('ECharts初始化错误:', error);
       return null;
     }
+  },
+
+  /**
+   * 加载心理测评数据并分析
+   */
+  async loadAndAnalyzePsychology(graphData, analysisResult) {
+    try {
+      // 1. 获取SCL-90心理测评数据
+      const scl90Res = await get('/api/module1/scl90');
+      if (scl90Res.code === 200 && scl90Res.data) {
+        // 2. 评估班级整体心理状态
+        const classPsychology = assessClassPsychology(scl90Res.data);
+        
+        // 3. 查找小团体（连通分量）
+        const components = findConnectedComponents(graphData.nodes, graphData.edges);
+        
+        // 4. 分析每个小团体的心理状态
+        const groupAnalysis = analyzeAllGroups(components, scl90Res.data);
+        
+        // 5. 筛选需要关注的小团体
+        const concernGroups = groupAnalysis.filter(group => group.needsAttention);
+        
+        // 6. 格式化数据（WXML不支持.toFixed()）
+        const formattedClassPsychology = {
+          ...classPsychology,
+          concernDimensions: classPsychology.concernDimensions.map(dim => ({
+            ...dim,
+            scoreFormatted: dim.score.toFixed(2)
+          }))
+        };
+        
+        const formattedGroupAnalysis = groupAnalysis.map((group, index) => ({
+          ...group,
+          index: index + 1, // 添加索引
+          problemDimensions: group.problemDimensions.map(prob => ({
+            ...prob,
+            scoreFormatted: prob.score.toFixed(2),
+            thresholdFormatted: prob.threshold.toFixed(1)
+          })),
+          reasonText: group.problemDimensions.length > 0 
+            ? `${group.problemDimensions[0].name}得分偏高，平均分${group.problemDimensions[0].score.toFixed(2)}，超过临界值${group.problemDimensions[0].threshold.toFixed(1)}`
+            : '整体心理状态需要关注'
+        }));
+        
+        const formattedConcernGroups = concernGroups.map((group, index) => ({
+          ...group,
+          index: index + 1,
+          problemDimensions: group.problemDimensions.map(prob => ({
+            ...prob,
+            scoreFormatted: prob.score.toFixed(2),
+            thresholdFormatted: prob.threshold.toFixed(1)
+          })),
+          reasonText: group.problemDimensions.length > 0 
+            ? `${group.problemDimensions[0].name}得分偏高，平均分${group.problemDimensions[0].score.toFixed(2)}，超过临界值${group.problemDimensions[0].threshold.toFixed(1)}`
+            : '整体心理状态需要关注'
+        }));
+        
+        // 7. 为需要关注的小团体生成ECharts图表
+        let psychologyChartOption = null;
+        if (formattedConcernGroups.length > 0) {
+          psychologyChartOption = this.createPsychologyChartOption(formattedConcernGroups);
+        }
+        
+        this.setData({
+          classPsychology: formattedClassPsychology,
+          groupAnalysis: formattedGroupAnalysis,
+          concernGroups: formattedConcernGroups,
+          ecPsychology: {
+            onInit: psychologyChartOption ? (canvas, width, height, dpr) => {
+              return this.initChart(canvas, width, height, dpr, psychologyChartOption);
+            } : null
+          }
+        });
+        
+        console.log('班级心理状态评估完成:', classPsychology);
+        console.log('小团体分析完成:', groupAnalysis);
+        console.log('需要关注的小团体:', concernGroups);
+      }
+    } catch (error) {
+      console.error('心理测评数据加载失败:', error);
+    }
+  },
+
+  /**
+   * 创建心理状态图表配置
+   */
+  createPsychologyChartOption(concernGroups) {
+    // 准备数据：每个小团体的主要问题维度
+    const seriesData = [];
+    const dimensions = [];
+    
+    concernGroups.forEach((group, index) => {
+      if (group.problemDimensions && group.problemDimensions.length > 0) {
+        const mainProblem = group.problemDimensions[0];
+        seriesData.push({
+          value: mainProblem.score,
+          name: `小团体${index + 1}`,
+          groupIndex: index,
+          groupInfo: group
+        });
+        dimensions.push(mainProblem.name);
+      }
+    });
+    
+    return {
+      backgroundColor: '#fafafa',
+      tooltip: {
+        trigger: 'item',
+        formatter: (params) => {
+          const group = params.data.groupInfo;
+          if (!group) return '';
+          
+          let html = `<div style="padding: 8px;"><div style="font-weight: bold; margin-bottom: 6px;">小团体${params.data.groupIndex + 1}</div>`;
+          html += `<div style="margin-bottom: 4px;">成员: ${group.studentNames.join('、')}</div>`;
+          html += `<div style="margin-bottom: 4px;">状态: ${group.groupStatus}</div>`;
+          if (group.problemDimensions && group.problemDimensions.length > 0) {
+            html += `<div style="margin-top: 8px; font-weight: bold;">问题维度:</div>`;
+            group.problemDimensions.forEach(prob => {
+              html += `<div style="margin-left: 8px;">• ${prob.name}: ${prob.score.toFixed(2)}</div>`;
+            });
+          }
+          html += `</div>`;
+          return html;
+        }
+      },
+      title: {
+        text: '需要关注的小团体',
+        left: 'center',
+        top: 10,
+        textStyle: {
+          fontSize: 16
+        }
+      },
+      series: [{
+        type: 'bar',
+        data: seriesData.map((item, index) => ({
+          value: item.value,
+          name: `小团体${index + 1}`,
+          itemStyle: {
+            color: item.value >= 2.0 ? '#ff4d4f' : item.value >= 1.5 ? '#faad14' : '#1890ff'
+          }
+        })),
+        label: {
+          show: true,
+          position: 'top',
+          formatter: (params) => {
+            return params.data.value.toFixed(2);
+          }
+        }
+      }],
+      xAxis: {
+        type: 'category',
+        data: seriesData.map((item, index) => `小团体${index + 1}`),
+        axisLabel: {
+          fontSize: 12
+        }
+      },
+      yAxis: {
+        type: 'value',
+        name: '得分',
+        min: 0,
+        max: 3,
+        axisLabel: {
+          fontSize: 12
+        }
+      }
+    };
   },
 
   /**

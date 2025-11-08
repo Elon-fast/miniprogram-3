@@ -345,6 +345,221 @@ export const mockStudentsForLeader = [
   }
 ];
 
+// ========== 模块1：SCL-90心理测评数据 ==========
+// SCL-90量表包含9个维度，每个维度10个题目，每题1-5分
+export const mockSCL90Data = [
+  {
+    studentId: 's001', studentName: '张小明',
+    scl90Data: {
+      somatization: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      obsessive: { items: [1, 1, 2, 1, 1, 1, 1, 1, 1, 1] },
+      interpersonal: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      depression: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      anxiety: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      hostility: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      phobic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      paranoid: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      psychotic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] }
+    }
+  },
+  {
+    studentId: 's002', studentName: '李小红',
+    scl90Data: {
+      somatization: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      obsessive: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      interpersonal: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      depression: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      anxiety: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      hostility: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      phobic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      paranoid: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      psychotic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] }
+    }
+  },
+  {
+    studentId: 's003', studentName: '王小强',
+    scl90Data: {
+      somatization: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      obsessive: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      interpersonal: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      depression: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      anxiety: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      hostility: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      phobic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      paranoid: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      psychotic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] }
+    }
+  },
+  {
+    studentId: 's004', studentName: '赵小美',
+    scl90Data: {
+      somatization: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      obsessive: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      interpersonal: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      depression: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      anxiety: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      hostility: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      phobic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      paranoid: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      psychotic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] }
+    }
+  },
+  {
+    studentId: 's005', studentName: '孙小亮',
+    scl90Data: {
+      somatization: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      obsessive: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      interpersonal: { items: [2, 2, 2, 2, 1, 1, 1, 1, 1, 1] }, // 人际关系敏感：关注
+      depression: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      anxiety: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      hostility: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      phobic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      paranoid: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      psychotic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] }
+    }
+  },
+  {
+    studentId: 's006', studentName: '周小静',
+    scl90Data: {
+      somatization: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      obsessive: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      interpersonal: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      depression: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      anxiety: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      hostility: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      phobic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      paranoid: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      psychotic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] }
+    }
+  },
+  {
+    studentId: 's007', studentName: '吴小刚',
+    scl90Data: {
+      somatization: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      obsessive: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      interpersonal: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      depression: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      anxiety: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      hostility: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      phobic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      paranoid: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      psychotic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] }
+    }
+  },
+  {
+    studentId: 's008', studentName: '郑小芳',
+    scl90Data: {
+      somatization: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      obsessive: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      interpersonal: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      depression: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      anxiety: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      hostility: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      phobic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      paranoid: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      psychotic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] }
+    }
+  },
+  {
+    studentId: 's009', studentName: '钱小华',
+    scl90Data: {
+      somatization: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      obsessive: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      interpersonal: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      depression: { items: [2, 2, 2, 2, 2, 1, 1, 1, 1, 1] }, // 抑郁：关注
+      anxiety: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      hostility: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      phobic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      paranoid: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      psychotic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] }
+    }
+  },
+  {
+    studentId: 's010', studentName: '陈小丽',
+    scl90Data: {
+      somatization: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      obsessive: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      interpersonal: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      depression: { items: [2, 2, 2, 2, 2, 1, 1, 1, 1, 1] }, // 抑郁：关注
+      anxiety: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      hostility: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      phobic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      paranoid: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      psychotic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] }
+    }
+  },
+  {
+    studentId: 's011', studentName: '林小军',
+    scl90Data: {
+      somatization: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      obsessive: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      interpersonal: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      depression: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      anxiety: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      hostility: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      phobic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      paranoid: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      psychotic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] }
+    }
+  },
+  {
+    studentId: 's012', studentName: '黄小燕',
+    scl90Data: {
+      somatization: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      obsessive: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      interpersonal: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      depression: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      anxiety: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      hostility: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      phobic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      paranoid: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      psychotic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] }
+    }
+  },
+  {
+    studentId: 's013', studentName: '刘小波',
+    scl90Data: {
+      somatization: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      obsessive: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      interpersonal: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      depression: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      anxiety: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      hostility: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      phobic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      paranoid: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      psychotic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] }
+    }
+  },
+  {
+    studentId: 's014', studentName: '徐小婷',
+    scl90Data: {
+      somatization: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      obsessive: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      interpersonal: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      depression: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      anxiety: { items: [2, 2, 2, 2, 2, 2, 2, 1, 1, 1] }, // 焦虑：异常
+      hostility: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      phobic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      paranoid: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      psychotic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] }
+    }
+  },
+  {
+    studentId: 's015', studentName: '马小飞',
+    scl90Data: {
+      somatization: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      obsessive: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      interpersonal: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      depression: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      anxiety: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      hostility: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      phobic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      paranoid: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+      psychotic: { items: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] }
+    }
+  }
+];
+
 // Mock测试数据（用于子页面，保持向后兼容）
 export const mockTestData = {
   module1: {

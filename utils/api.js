@@ -12,7 +12,8 @@ import {
   mockQuestionnaireData,
   mockStudentsForSeating,
   mockInteractionHistory,
-  mockStudentsForLeader
+  mockStudentsForLeader,
+  mockSCL90Data
 } from './mockData.js';
 
 // 基础URL配置（开发阶段可为空，或配置Mock API基础路径）
@@ -122,6 +123,14 @@ function request(options = {}) {
           code: 200,
           message: 'success',
           data: { message: '分析结果将在后端计算' }
+        };
+      }
+      // 模块1：SCL-90心理测评数据接口
+      else if (url.includes('/api/module1/scl90') || url === '/api/module1/scl90') {
+        mockResponse = {
+          code: 200,
+          message: 'success',
+          data: mockSCL90Data
         };
       }
       // 模块2：智能排座 - 学生数据接口

@@ -55,6 +55,103 @@
       </view>
     </view>
 
+    <!-- 班级整体心理状态 -->
+    <view class="psychology-card" wx:if="{{classPsychology}}">
+      <view class="section-title">💚 班级整体心理状态</view>
+      <view class="psychology-overview">
+        <view class="atmosphere-badge {{classPsychology.classAtmosphere === '正常' ? 'normal' : classPsychology.classAtmosphere === '阳光积极' ? 'positive' : 'concern'}}">
+          <text class="atmosphere-label">整体氛围</text>
+          <text class="atmosphere-value">{{classPsychology.classAtmosphere}}</text>
+        </view>
+        <view class="psychology-stats">
+          <view class="psychology-stat-item" wx:if="{{classPsychology.concernDimensions.length > 0}}">
+            <text class="stat-label">关注维度:</text>
+            <text class="stat-value">{{classPsychology.concernDimensions.length}}个</text>
+          </view>
+          <view class="psychology-stat-item">
+            <text class="stat-label">评估学生:</text>
+            <text class="stat-value">{{classPsychology.totalStudents}}人</text>
+          </view>
+        </view>
+      </view>
+      <view class="concern-dimensions" wx:if="{{classPsychology.concernDimensions.length > 0}}">
+        <text class="concern-title">需要关注的维度：</text>
+        <view class="dimension-tags">
+          <view class="dimension-tag" wx:for="{{classPsychology.concernDimensions}}" wx:key="dimension">
+            <text>{{item.name}} ({{item.scoreFormatted}})</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 小团体心理分析 -->
+    <view class="group-analysis-card" wx:if="{{groupAnalysis && groupAnalysis.length > 0}}">
+      <view class="section-title">👥 小团体心理状态分析</view>
+      
+      <!-- 需要关注的小团体 -->
+      <view class="concern-groups-section" wx:if="{{concernGroups.length > 0}}">
+        <view class="concern-groups-header">
+          <text class="concern-groups-title">⚠️ 需要关注的小团体 ({{concernGroups.length}}个)</text>
+        </view>
+        
+        <!-- 心理状态图表 -->
+        <view class="psychology-chart-container" wx:if="{{ecPsychology.onInit}}">
+          <ec-canvas 
+            id="psychologyChart" 
+            canvas-id="psychologyChart" 
+            ec="{{ ecPsychology }}"
+            class="ec-canvas"
+          ></ec-canvas>
+        </view>
+        
+        <!-- 小团体详情列表 -->
+        <view class="group-list">
+          <view class="group-item concern" wx:for="{{concernGroups}}" wx:key="index" wx:for-item="group">
+            <view class="group-header">
+              <text class="group-name">小团体{{group.index}}</text>
+              <view class="group-status-badge {{group.groupStatus === '正常' ? 'normal' : 'warning'}}">
+                <text>{{group.groupStatus}}</text>
+              </view>
+            </view>
+            <view class="group-members">
+              <text class="members-label">成员：</text>
+              <text class="members-names">{{group.studentNames.join('、')}}</text>
+            </view>
+            <view class="group-problems" wx:if="{{group.problemDimensions.length > 0}}">
+              <text class="problems-label">问题维度：</text>
+              <view class="problem-tags">
+                <view class="problem-tag" wx:for="{{group.problemDimensions}}" wx:key="dimension" wx:for-item="prob">
+                  <text>{{prob.name}} ({{prob.scoreFormatted}})</text>
+                </view>
+              </view>
+            </view>
+            <view class="group-reason">
+              <text class="reason-label">关注原因：</text>
+              <text class="reason-text">{{group.reasonText}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 正常小团体 -->
+      <view class="normal-groups-section" wx:if="{{groupAnalysis.length > concernGroups.length}}">
+        <view class="normal-groups-header">
+          <text class="normal-groups-title">✅ 正常小团体 ({{groupAnalysis.length - concernGroups.length}}个)</text>
+        </view>
+        <view class="group-list">
+          <view class="group-item normal" wx:for="{{groupAnalysis}}" wx:key="index" wx:for-item="group" wx:if="{{!group.needsAttention}}">
+            <view class="group-header">
+              <text class="group-name">小团体{{group.index}}</text>
+              <text class="group-member-count">({{group.studentCount}}人)</text>
+            </view>
+            <view class="group-members">
+              <text class="members-names">{{group.studentNames.join('、')}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
     <!-- 意见领袖 -->
     <view class="section-card" wx:if="{{analysisResult.leaders.length > 0}}">
       <view class="section-title">🌟 意见领袖 ({{analysisResult.leaders.length}}人)</view>
