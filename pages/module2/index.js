@@ -20,6 +20,9 @@ Page({
     showLayoutModal: false, // 显示布局设置弹窗
     customRows: 4, // 自定义行数
     customCols: 4, // 自定义列数
+    groupCols: '2', // 每个大组的列数配置（字符串，如"242"表示三个大组分别为2、4、2列）
+    groupColsArray: [2], // 解析后的大组列数数组
+    groupData: [{ cols: 2, startIndex: 0 }], // 大组数据数组，每个元素包含{cols: 列数, startIndex: 起始索引}
     unassignedStudents: [], // 待排列的学生列表
     // 拖拽相关
     draggingStudent: null, // 正在拖拽的学生
@@ -111,10 +114,32 @@ Page({
         })
       );
       
+      // 默认大组配置：每2列一组
+      const defaultGroupCols = Math.floor(cols / 2);
+      const defaultGroupColsArray = Array(defaultGroupCols).fill(2);
+      const remainingCols = cols % 2;
+      if (remainingCols > 0) {
+        defaultGroupColsArray.push(remainingCols);
+      }
+      
+      // 计算每个大组的起始列索引，并构建大组数据（包含起始索引）
+      const defaultGroupData = [];
+      let currentIndex = 0;
+      defaultGroupColsArray.forEach(groupCols => {
+        defaultGroupData.push({
+          cols: groupCols,
+          startIndex: currentIndex
+        });
+        currentIndex += groupCols;
+      });
+      
       this.setData({
         seatTable: seatTableWithNames,
         rows: rows,
         cols: cols,
+        groupCols: '2', // 默认每个大组2列
+        groupColsArray: defaultGroupColsArray,
+        groupData: defaultGroupData, // 大组数据（包含列数和起始索引）
         showSeatTable: true,
         seatStats: result.stats,
         isCustomMode: false,
@@ -197,13 +222,73 @@ Page({
     this.setData({
       customCols: validCols
     });
+    
+    // 如果大组列数配置为空，自动设置为默认值
+    if (!this.data.groupCols || this.data.groupCols === '') {
+      this.setData({
+        groupCols: '2'
+      });
+    }
+  },
+
+  /**
+   * 输入大组列数配置
+   */
+  onGroupColsInput(e) {
+    const value = e.detail.value;
+    // 只允许输入数字
+    const numericValue = value.replace(/[^\d]/g, '');
+    this.setData({
+      groupCols: numericValue
+    });
+  },
+
+  /**
+   * 验证大组列数配置
+   */
+  validateGroupCols(groupColsStr, totalCols) {
+    if (!groupColsStr || groupColsStr === '') {
+      return { valid: false, message: '请输入大组列数配置' };
+    }
+    
+    // 如果输入的是单个数字，表示每个大组都是这个数字
+    if (groupColsStr.length === 1) {
+      const groupCols = parseInt(groupColsStr);
+      if (isNaN(groupCols) || groupCols <= 0) {
+        return { valid: false, message: '大组列数必须为正整数' };
+      }
+      
+      // 检查是否能整除
+      if (totalCols % groupCols !== 0) {
+        return { valid: false, message: `总列数${totalCols}无法被大组列数${groupCols}整除` };
+      }
+      
+      return { valid: true, groups: Array(totalCols / groupCols).fill(groupCols) };
+    }
+    
+    // 如果输入的是多个数字，解析每个大组的列数
+    const groupColsArray = groupColsStr.split('').map(s => parseInt(s));
+    
+    // 检查是否都是有效数字
+    if (groupColsArray.some(n => isNaN(n) || n <= 0)) {
+      return { valid: false, message: '大组列数配置包含无效数字' };
+    }
+    
+    // 计算总列数
+    const sum = groupColsArray.reduce((a, b) => a + b, 0);
+    
+    if (sum !== totalCols) {
+      return { valid: false, message: `大组列数总和(${sum})与总列数(${totalCols})不匹配` };
+    }
+    
+    return { valid: true, groups: groupColsArray };
   },
 
   /**
    * 确认自定义布局
    */
   confirmCustomLayout() {
-    let { customRows, customCols, students } = this.data;
+    let { customRows, customCols, groupCols, students } = this.data;
     
     // 验证输入值
     customRows = parseInt(customRows) || 4;
@@ -213,10 +298,32 @@ Page({
     customRows = Math.max(1, Math.min(customRows, 10));
     customCols = Math.max(1, Math.min(customCols, 10));
     
+    // 验证大组列数配置
+    const validation = this.validateGroupCols(groupCols, customCols);
+    if (!validation.valid) {
+      wx.showModal({
+        title: '输入错误',
+        content: validation.message,
+        showCancel: false
+      });
+      return;
+    }
+    
     // 创建空的座位表
     const emptySeatTable = Array(customRows).fill(null).map(() => 
       Array(customCols).fill(null)
     );
+    
+    // 计算每个大组的起始列索引，并构建大组数据（包含起始索引）
+    const groupData = [];
+    let currentIndex = 0;
+    validation.groups.forEach(groupCols => {
+      groupData.push({
+        cols: groupCols,
+        startIndex: currentIndex
+      });
+      currentIndex += groupCols;
+    });
     
     // 将所有学生放入待排列区域
     const unassignedStudents = students.map(s => ({
@@ -228,6 +335,9 @@ Page({
       seatTable: emptySeatTable,
       rows: customRows,
       cols: customCols,
+      groupCols: groupCols, // 保存大组配置字符串
+      groupColsArray: validation.groups, // 保存解析后的大组数组
+      groupData: groupData, // 大组数据（包含列数和起始索引）
       showSeatTable: true,
       isCustomMode: true,
       unassignedStudents: unassignedStudents,

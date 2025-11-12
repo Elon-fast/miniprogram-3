@@ -266,16 +266,39 @@
   text-align: center;
 }
 
+/* 座位表滚动容器 */
+.seat-table-scroll {
+  width: 100%;
+  white-space: nowrap;
+  overflow-x: auto;
+}
+
 .seat-table {
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
   gap: 12rpx;
+  min-width: max-content;
 }
 
 .seat-row {
   display: flex;
   gap: 12rpx;
-  justify-content: center;
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-shrink: 0;
+}
+
+/* 大组容器 */
+.seat-group {
+  display: flex;
+  gap: 12rpx;
+  flex-shrink: 0;
+}
+
+/* 大组之间的间隙 */
+.seat-group-gap {
+  width: 40rpx;
+  flex-shrink: 0;
 }
 
 .seat-cell {
@@ -287,6 +310,7 @@
   justify-content: center;
   border: 2rpx solid #e8e8e8;
   box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .seat-cell.occupied {

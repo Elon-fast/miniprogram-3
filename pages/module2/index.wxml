@@ -36,25 +36,34 @@
     <!-- 座位表 -->
     <view class="seat-table-container">
       <view class="seat-table-title">座位表 ({{rows}}行 × {{cols}}列)</view>
-      <view class="seat-table">
-        <view class="seat-row" wx:for="{{seatTable}}" wx:key="index" wx:for-item="row" wx:for-index="rowIndex">
-          <view 
-            class="seat-cell {{item ? 'occupied' : 'empty'}} {{selectedSeat && selectedSeat.row === rowIndex && selectedSeat.col === colIndex ? 'selected' : ''}}" 
-            wx:for="{{row}}" 
-            wx:key="id"
-            wx:for-item="student"
-            wx:for-index="colIndex"
-            data-row="{{rowIndex}}"
-            data-col="{{colIndex}}"
-            bindtap="onSeatClick"
-          >
-            <text class="seat-name" wx:if="{{student}}">
-              {{student.name}}
-            </text>
-            <text class="seat-empty" wx:else>空</text>
+      <scroll-view class="seat-table-scroll" scroll-x="true" enable-flex="true">
+        <view class="seat-table">
+          <view class="seat-row" wx:for="{{seatTable}}" wx:key="index" wx:for-item="row" wx:for-index="rowIndex">
+            <!-- 按照大组分组显示 -->
+            <block wx:for="{{groupData}}" wx:key="startIndex" wx:for-item="group" wx:for-index="groupIndex">
+              <view class="seat-group">
+                <view 
+                  class="seat-cell {{row[group.startIndex + colIndex] ? 'occupied' : 'empty'}} {{selectedSeat && selectedSeat.row === rowIndex && selectedSeat.col === (group.startIndex + colIndex) ? 'selected' : ''}}" 
+                  wx:for="{{group.cols}}" 
+                  wx:key="colIndex"
+                  wx:for-item="col"
+                  wx:for-index="colIndex"
+                  data-row="{{rowIndex}}"
+                  data-col="{{group.startIndex + colIndex}}"
+                  bindtap="onSeatClick"
+                >
+                  <text class="seat-name" wx:if="{{row[group.startIndex + colIndex]}}">
+                    {{row[group.startIndex + colIndex].name}}
+                  </text>
+                  <text class="seat-empty" wx:else>空</text>
+                </view>
+              </view>
+              <!-- 大组之间的间隙（最后一个大组后不显示） -->
+              <view class="seat-group-gap" wx:if="{{groupIndex < groupData.length - 1}}"></view>
+            </block>
           </view>
         </view>
-      </view>
+      </scroll-view>
     </view>
 
     <!-- 待排列区域（自定义模式显示） -->
@@ -122,8 +131,21 @@
           placeholder="请输入列数(1-10)"
         />
       </view>
+      <view class="input-group">
+        <text class="input-label">大组列数:</text>
+        <input 
+          class="input-field" 
+          type="text" 
+          value="{{groupCols}}" 
+          bindinput="onGroupColsInput"
+          placeholder="如: 242 或 2"
+        />
+      </view>
       <view class="modal-tips">
-        <text>💡 提示：设置行列后，所有学生将进入待排列区域，您可以手动拖拽排列</text>
+        <text>💡 提示：</text>
+        <text>• 设置行列后，所有学生将进入待排列区域，您可以手动拖拽排列</text>
+        <text>• 大组列数：输入单个数字(如"2")表示每个大组都是该列数</text>
+        <text>• 输入连续数字(如"242")表示从左到右每个大组的列数，总和需等于总列数</text>
       </view>
     </view>
     <view class="modal-footer">
