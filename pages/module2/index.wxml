@@ -2,7 +2,12 @@
 <view class="container">
   <view class="header">
     <text class="title">{{title}}</text>
-    <button class="generate-btn" bindtap="reGenerate" size="mini" wx:if="{{showSeatTable}}">重新生成</button>
+    <view class="header-buttons">
+      <button class="action-btn" bindtap="showCustomLayout" size="mini">自定义布局</button>
+      <button class="action-btn" bindtap="autoArrange" size="mini" wx:if="{{isCustomMode}}">自动排列</button>
+      <button class="action-btn" bindtap="clearArrangement" size="mini" wx:if="{{isCustomMode}}">清空排列</button>
+      <button class="action-btn" bindtap="reGenerate" size="mini" wx:if="{{showSeatTable && !isCustomMode}}">重新生成</button>
+    </view>
   </view>
 
   <!-- 加载状态 -->
@@ -32,12 +37,16 @@
     <view class="seat-table-container">
       <view class="seat-table-title">座位表 ({{rows}}行 × {{cols}}列)</view>
       <view class="seat-table">
-        <view class="seat-row" wx:for="{{seatTable}}" wx:key="index" wx:for-item="row">
+        <view class="seat-row" wx:for="{{seatTable}}" wx:key="index" wx:for-item="row" wx:for-index="rowIndex">
           <view 
-            class="seat-cell {{item ? 'occupied' : 'empty'}}" 
+            class="seat-cell {{item ? 'occupied' : 'empty'}} {{selectedSeat && selectedSeat.row === rowIndex && selectedSeat.col === colIndex ? 'selected' : ''}}" 
             wx:for="{{row}}" 
             wx:key="id"
             wx:for-item="student"
+            wx:for-index="colIndex"
+            data-row="{{rowIndex}}"
+            data-col="{{colIndex}}"
+            bindtap="onSeatClick"
           >
             <text class="seat-name" wx:if="{{student}}">
               {{student.name}}
@@ -48,12 +57,32 @@
       </view>
     </view>
 
+    <!-- 待排列区域（自定义模式显示） -->
+    <view class="unassigned-container" wx:if="{{isCustomMode && unassignedStudents.length > 0}}">
+      <view class="unassigned-title">待排列学生 ({{unassignedStudents.length}}人)</view>
+      <view class="unassigned-list">
+        <view 
+          class="student-tag {{draggingStudent && draggingStudent.id === student.id ? 'selected' : ''}}"
+          wx:for="{{unassignedStudents}}"
+          wx:key="id"
+          wx:for-item="student"
+          data-student-id="{{student.id}}"
+          bindtap="onStudentClick"
+        >
+          <text>{{student.name}}</text>
+        </view>
+      </view>
+    </view>
+
     <!-- 说明 -->
     <view class="info-card">
       <view class="info-title">💡 排座说明</view>
       <view class="info-content">
-        <text>• 算法综合考虑学科互补、性格相容、避免干扰等因素</text>
-        <text>• 点击"重新生成"可生成不同的座位安排方案</text>
+        <text wx:if="{{isCustomMode}}">• 自定义模式下，可以拖拽学生标签到座位进行排列</text>
+        <text wx:if="{{isCustomMode}}">• 可以拖拽座位中的学生到其他位置进行交换</text>
+        <text wx:if="{{isCustomMode}}">• 点击"自动排列"可将待排列学生自动分配到剩余座位</text>
+        <text wx:if="{{!isCustomMode}}">• 算法综合考虑学科互补、性格相容、避免干扰等因素</text>
+        <text wx:if="{{!isCustomMode}}">• 点击"重新生成"可生成不同的座位安排方案</text>
         <text>• 空座位表示该位置未安排学生</text>
       </view>
     </view>
@@ -62,5 +91,44 @@
   <!-- 空状态 -->
   <view class="empty" wx:if="{{!loading && !showSeatTable}}">
     <text>暂无数据</text>
+  </view>
+</view>
+
+<!-- 自定义布局弹窗 -->
+<view class="layout-modal" wx:if="{{showLayoutModal}}" bindtap="closeLayoutModal">
+  <view class="modal-content" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">自定义布局</text>
+      <text class="modal-close" bindtap="closeLayoutModal">×</text>
+    </view>
+    <view class="modal-body">
+      <view class="input-group">
+        <text class="input-label">行数:</text>
+        <input 
+          class="input-field" 
+          type="number" 
+          value="{{customRows}}" 
+          bindinput="onRowInput"
+          placeholder="请输入行数(1-10)"
+        />
+      </view>
+      <view class="input-group">
+        <text class="input-label">列数:</text>
+        <input 
+          class="input-field" 
+          type="number" 
+          value="{{customCols}}" 
+          bindinput="onColInput"
+          placeholder="请输入列数(1-10)"
+        />
+      </view>
+      <view class="modal-tips">
+        <text>💡 提示：设置行列后，所有学生将进入待排列区域，您可以手动拖拽排列</text>
+      </view>
+    </view>
+    <view class="modal-footer">
+      <button class="modal-btn cancel" bindtap="closeLayoutModal">取消</button>
+      <button class="modal-btn confirm" bindtap="confirmCustomLayout">确定</button>
+    </view>
   </view>
 </view>
