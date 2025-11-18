@@ -66,22 +66,26 @@
   width: 100%;
 }
 
-.auto-arrange-header {
+
+/* 自定义排列因素头部 */
+.custom-factors-header {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8rpx;
-  width: 100%;
+  padding: 12rpx 0;
+  cursor: pointer;
 }
 
-.auto-arrange-btn {
-  flex: 1;
+.custom-factors-text {
+  font-size: 24rpx;
+  color: #666;
 }
 
 .dropdown-icon {
   font-size: 20rpx;
   color: #666;
   transition: transform 0.3s;
-  padding: 8rpx;
 }
 
 .dropdown-icon.expanded {
