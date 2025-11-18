@@ -31,7 +31,17 @@ Page({
     isDragging: false, // 是否正在拖拽
     dragStartPos: { x: 0, y: 0 }, // 拖拽起始位置
     dragTimer: null, // 长按定时器
-    selectedSeat: null // 当前选中的座位位置 {row, col}
+    selectedSeat: null, // 当前选中的座位位置 {row, col}
+    // 自动排列设置相关
+    showAutoArrangeSettings: false, // 是否显示自动排列设置
+    autoArrangeWeights: {
+      complementarity: 1, // 学科互补权重，范围-1到1，默认1
+      compatibility: 1,   // 性格相融权重，范围-1到1，默认1
+      interference: 1    // 避免干扰权重，范围-1到1，默认1
+    },
+    complementarityValue: '1.0', // 格式化后的显示值
+    compatibilityValue: '1.0',
+    interferenceValue: '1.0'
   },
 
   /**
@@ -98,9 +108,9 @@ Page({
         {
           interactionHistory: this.data.interactionHistory,
           weights: {
-            complementarity: 0.4,
-            compatibility: 0.4,
-            interference: 0.2
+            complementarity: this.data.autoArrangeWeights.complementarity,
+            compatibility: this.data.autoArrangeWeights.compatibility,
+            interference: this.data.autoArrangeWeights.interference
           }
         }
       );
@@ -358,10 +368,56 @@ Page({
   },
 
   /**
+   * 切换自动排列设置显示/隐藏
+   */
+  toggleAutoArrangeSettings() {
+    this.setData({
+      showAutoArrangeSettings: !this.data.showAutoArrangeSettings
+    });
+  },
+
+  /**
+   * 调整权重滑动条
+   */
+  onWeightChange(e) {
+    const { type } = e.currentTarget.dataset;
+    const value = parseFloat(e.detail.value);
+    const formattedValue = value.toFixed(1);
+    
+    const updateData = {
+      [`autoArrangeWeights.${type}`]: value
+    };
+    
+    // 更新格式化后的显示值
+    if (type === 'complementarity') {
+      updateData.complementarityValue = formattedValue;
+    } else if (type === 'compatibility') {
+      updateData.compatibilityValue = formattedValue;
+    } else if (type === 'interference') {
+      updateData.interferenceValue = formattedValue;
+    }
+    
+    this.setData(updateData);
+  },
+
+  /**
+   * 保存自动排列设置
+   */
+  saveAutoArrangeSettings() {
+    wx.showToast({
+      title: '设置已保存',
+      icon: 'success'
+    });
+    this.setData({
+      showAutoArrangeSettings: false
+    });
+  },
+
+  /**
    * 自动排列（仅排列待排列区域的学生到剩余座位）
    */
-  autoArrange() {
-    const { seatTable, unassignedStudents, students, interactionHistory } = this.data;
+  async autoArrange() {
+    const { seatTable, unassignedStudents, students, interactionHistory, autoArrangeWeights } = this.data;
     
     if (unassignedStudents.length === 0) {
       wx.showToast({
@@ -400,20 +456,39 @@ Page({
     // 使用算法生成排列（只针对待排列的学生）
     if (studentsToAssign.length > 0) {
       try {
-        // 创建一个新的座位表，只包含待排列的学生
-        const result = generateSeatArrangement(
-          studentsToAssign,
-          this.data.rows,
-          this.data.cols,
-          {
-            interactionHistory: interactionHistory,
-            weights: {
-              complementarity: 0.4,
-              compatibility: 0.4,
-              interference: 0.2
+        // 调用后端API进行自动排列（当前使用mock数据）
+        const currentClass = getApp().globalData.currentClass || '五年级一班';
+        const result = await get('/api/module2/autoArrange', {
+          students: studentsToAssign.map(s => s.id),
+          rows: this.data.rows,
+          cols: this.data.cols,
+          class: currentClass,
+          weights: {
+            complementarity: autoArrangeWeights.complementarity,
+            compatibility: autoArrangeWeights.compatibility,
+            interference: autoArrangeWeights.interference
+          },
+          interactionHistory: interactionHistory
+        });
+        
+        // 如果API返回失败，使用本地算法作为fallback
+        let seatArrangementResult = result.data || result;
+        if (!seatArrangementResult || !seatArrangementResult.seatTable) {
+          // Fallback: 使用本地算法
+          seatArrangementResult = generateSeatArrangement(
+            studentsToAssign,
+            this.data.rows,
+            this.data.cols,
+            {
+              interactionHistory: interactionHistory,
+              weights: {
+                complementarity: autoArrangeWeights.complementarity,
+                compatibility: autoArrangeWeights.compatibility,
+                interference: autoArrangeWeights.interference
+              }
             }
-          }
-        );
+          );
+        }
         
         // 更新座位表：保留已有座位，只更新空座位位置
         const newSeatTable = seatTable.map((row, rowIndex) => 
@@ -423,7 +498,7 @@ Page({
               return seat;
             }
             // 如果是空座位，尝试从算法结果中获取
-            const studentId = result.seatTable[rowIndex]?.[colIndex];
+            const studentId = seatArrangementResult.seatTable[rowIndex]?.[colIndex];
             if (studentId) {
               const student = students.find(s => s.id === studentId);
               return student ? { 

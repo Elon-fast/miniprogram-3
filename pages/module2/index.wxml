@@ -79,12 +79,99 @@
       </view>
     </view>
 
-    <!-- 操作按钮 -->
-    <view class="action-buttons">
-      <button class="action-btn" bindtap="showCustomLayout" size="mini">自定义布局</button>
-      <button class="action-btn" bindtap="autoArrange" size="mini" wx:if="{{isCustomMode}}">自动排列</button>
-      <button class="action-btn" bindtap="clearArrangement" size="mini" wx:if="{{isCustomMode}}">清空排列</button>
-      <button class="action-btn" bindtap="reGenerate" size="mini" wx:if="{{showSeatTable && !isCustomMode}}">重新生成</button>
+    <!-- 排列功能区域 -->
+    <view class="arrange-functions-container" wx:if="{{isCustomMode}}">
+      <view class="arrange-functions-title">排列功能</view>
+      <view class="arrange-functions-buttons">
+        <button class="action-btn" bindtap="showCustomLayout" size="mini">自定义布局</button>
+        <button class="action-btn" bindtap="clearArrangement" size="mini">清空排列</button>
+      </view>
+      
+      <!-- 自动排列模块（下拉式） -->
+      <view class="auto-arrange-container">
+        <view class="auto-arrange-header" bindtap="toggleAutoArrangeSettings">
+          <button class="action-btn auto-arrange-btn" bindtap="autoArrange" catchtap="stopPropagation" size="mini">自动排列</button>
+          <view class="dropdown-icon {{showAutoArrangeSettings ? 'expanded' : ''}}">▼</view>
+        </view>
+        
+        <!-- 自动排列设置面板 -->
+        <view class="auto-arrange-settings {{showAutoArrangeSettings ? 'show' : ''}}" wx:if="{{showAutoArrangeSettings}}">
+          <view class="settings-title">影响因子权重设置</view>
+          
+          <!-- 学科互补 -->
+          <view class="weight-item">
+            <view class="weight-label">
+              <text class="weight-name">学科互补</text>
+              <text class="weight-value">{{complementarityValue}}</text>
+            </view>
+            <slider 
+              class="weight-slider"
+              min="-1" 
+              max="1" 
+              step="0.1"
+              value="{{autoArrangeWeights.complementarity}}"
+              data-type="complementarity"
+              bindchange="onWeightChange"
+              activeColor="#1890ff"
+              backgroundColor="#e8e8e8"
+            />
+            <view class="weight-desc">
+              <text class="desc-text">负值：优先不互补 | 正值：优先互补</text>
+            </view>
+          </view>
+          
+          <!-- 性格相融 -->
+          <view class="weight-item">
+            <view class="weight-label">
+              <text class="weight-name">性格相融</text>
+              <text class="weight-value">{{compatibilityValue}}</text>
+            </view>
+            <slider 
+              class="weight-slider"
+              min="-1" 
+              max="1" 
+              step="0.1"
+              value="{{autoArrangeWeights.compatibility}}"
+              data-type="compatibility"
+              bindchange="onWeightChange"
+              activeColor="#1890ff"
+              backgroundColor="#e8e8e8"
+            />
+            <view class="weight-desc">
+              <text class="desc-text">负值：优先不相融 | 正值：优先相融</text>
+            </view>
+          </view>
+          
+          <!-- 避免干扰 -->
+          <view class="weight-item">
+            <view class="weight-label">
+              <text class="weight-name">避免干扰</text>
+              <text class="weight-value">{{interferenceValue}}</text>
+            </view>
+            <slider 
+              class="weight-slider"
+              min="-1" 
+              max="1" 
+              step="0.1"
+              value="{{autoArrangeWeights.interference}}"
+              data-type="interference"
+              bindchange="onWeightChange"
+              activeColor="#1890ff"
+              backgroundColor="#e8e8e8"
+            />
+            <view class="weight-desc">
+              <text class="desc-text">负值：优先有联系 | 正值：优先避免干扰</text>
+            </view>
+          </view>
+          
+          <button class="save-settings-btn" bindtap="saveAutoArrangeSettings">确定</button>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 重新生成按钮（非自定义模式） -->
+    <view class="action-buttons" wx:if="{{showSeatTable && !isCustomMode}}">
+      <button class="action-btn" bindtap="reGenerate" size="mini">重新生成</button>
     </view>
 
     <!-- 说明 -->

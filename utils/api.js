@@ -15,6 +15,7 @@ import {
   mockStudentsForLeader,
   mockSCL90Data
 } from './mockData.js';
+import { generateSeatArrangement } from './seatArrangementAlgorithm.js';
 
 // 基础URL配置（开发阶段可为空，或配置Mock API基础路径）
 const BASE_URL = '';
@@ -149,7 +150,38 @@ function request(options = {}) {
           data: mockInteractionHistory
         };
       }
-      // 模块2：智能排座 - 生成座位表接口
+      // 模块2：智能排座 - 自动排列接口
+      else if (url.includes('/api/module2/autoArrange') || url === '/api/module2/autoArrange') {
+        // Mock自动排列接口
+        setTimeout(() => {
+          // 这里应该调用后端算法，当前使用本地算法模拟
+          const { students, rows, cols, weights, interactionHistory, class: className } = data;
+          
+          // 从students数组中获取完整的学生信息
+          const fullStudents = mockStudentsForSeating.filter(s => students.includes(s.id));
+          
+          const result = generateSeatArrangement(
+            fullStudents,
+            rows,
+            cols,
+            {
+              interactionHistory: interactionHistory || [],
+              weights: weights || {
+                complementarity: 1,
+                compatibility: 1,
+                interference: 1
+              }
+            }
+          );
+          
+          resolve({
+            code: 200,
+            message: '自动排列成功',
+            data: result
+          });
+        }, 800);
+        return; // 避免继续执行后续代码
+      }
       else if (url.includes('/api/module2/arrange') || url === '/api/module2/arrange') {
         mockResponse = {
           code: 200,
