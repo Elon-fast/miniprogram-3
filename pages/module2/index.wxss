@@ -18,10 +18,11 @@
   color: #333;
 }
 
-.header-buttons {
+.action-buttons {
   display: flex;
   gap: 12rpx;
   flex-wrap: wrap;
+  margin-top: 24rpx;
 }
 
 .action-btn {
@@ -73,24 +74,62 @@
 }
 
 .student-tag {
-  padding: 12rpx 20rpx;
-  background-color: #e6f7ff;
-  border: 2rpx solid #91d5ff;
   border-radius: 8rpx;
+  padding: 12rpx 20rpx;
   font-size: 26rpx;
-  color: #1890ff;
   cursor: pointer;
   user-select: none;
   touch-action: none;
+  border: 2rpx solid;
 }
 
-.student-tag.selected {
+/* 男生标签（蓝色） */
+.student-tag.male {
+  background-color: #e6f7ff;
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
+/* 女生标签（红色） */
+.student-tag.female {
+  background-color: #fff1f0;
+  border-color: #ff4d4f;
+  color: #ff4d4f;
+}
+
+/* 选中状态 - 男生 */
+.student-tag.male.selected {
   background-color: #bae7ff;
   border-color: #1890ff;
   transform: scale(1.05);
   box-shadow: 0 4rpx 12rpx rgba(24, 144, 255, 0.3);
 }
 
+/* 选中状态 - 女生 */
+.student-tag.female.selected {
+  background-color: #ffccc7;
+  border-color: #ff4d4f;
+  transform: scale(1.05);
+  box-shadow: 0 4rpx 12rpx rgba(255, 77, 79, 0.3);
+}
+
+/* 选中状态 - 男生座位 */
+.seat-cell.selected.male {
+  border-color: #1890ff;
+  border-width: 3rpx;
+  box-shadow: 0 4rpx 12rpx rgba(24, 144, 255, 0.3);
+  transform: scale(1.05);
+}
+
+/* 选中状态 - 女生座位 */
+.seat-cell.selected.female {
+  border-color: #ff4d4f;
+  border-width: 3rpx;
+  box-shadow: 0 4rpx 12rpx rgba(255, 77, 79, 0.3);
+  transform: scale(1.05);
+}
+
+/* 选中状态 - 默认（空座位或没有性别信息） */
 .seat-cell.selected {
   border-color: #1890ff;
   border-width: 3rpx;
@@ -313,26 +352,52 @@
   flex-shrink: 0;
 }
 
-.seat-cell.occupied {
-  background-color: #e6f7ff;
-  border-color: #1890ff;
-}
-
+/* 空座位样式 */
 .seat-cell.empty {
   background-color: #f5f5f5;
   border-color: #d9d9d9;
 }
 
-.seat-name {
-  font-size: 24rpx;
-  color: #333;
-  text-align: center;
-  word-break: break-all;
-  padding: 8rpx;
+/* 已填满座位 - 男生（蓝色） */
+.seat-cell.occupied.male {
+  background-color: #e6f7ff;
+  border-color: #1890ff;
 }
 
-.seat-empty {
+/* 已填满座位 - 女生（红色） */
+.seat-cell.occupied.female {
+  background-color: #fff1f0;
+  border-color: #ff4d4f;
+}
+
+/* 已填满座位 - 默认（如果没有性别信息，使用蓝色） */
+.seat-cell.occupied {
+  background-color: #e6f7ff;
+  border-color: #1890ff;
+}
+
+.seat-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.seat-text {
   font-size: 24rpx;
+  color: #333;
+  word-break: break-all;
+}
+
+.seat-content-empty {
+  color: #999;
+}
+
+.seat-content-empty .seat-text,
+.seat-text-empty {
   color: #999;
 }
 

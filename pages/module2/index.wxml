@@ -2,12 +2,6 @@
 <view class="container">
   <view class="header">
     <text class="title">{{title}}</text>
-    <view class="header-buttons">
-      <button class="action-btn" bindtap="showCustomLayout" size="mini">自定义布局</button>
-      <button class="action-btn" bindtap="autoArrange" size="mini" wx:if="{{isCustomMode}}">自动排列</button>
-      <button class="action-btn" bindtap="clearArrangement" size="mini" wx:if="{{isCustomMode}}">清空排列</button>
-      <button class="action-btn" bindtap="reGenerate" size="mini" wx:if="{{showSeatTable && !isCustomMode}}">重新生成</button>
-    </view>
   </view>
 
   <!-- 加载状态 -->
@@ -43,7 +37,7 @@
             <block wx:for="{{groupData}}" wx:key="startIndex" wx:for-item="group" wx:for-index="groupIndex">
               <view class="seat-group">
                 <view 
-                  class="seat-cell {{row[group.startIndex + colIndex] ? 'occupied' : 'empty'}} {{selectedSeat && selectedSeat.row === rowIndex && selectedSeat.col === (group.startIndex + colIndex) ? 'selected' : ''}}" 
+                  class="seat-cell {{row[group.startIndex + colIndex] ? 'occupied' : 'empty'}} {{row[group.startIndex + colIndex] && row[group.startIndex + colIndex].gender === 'female' ? 'female' : ''}} {{row[group.startIndex + colIndex] && row[group.startIndex + colIndex].gender === 'male' ? 'male' : ''}} {{selectedSeat && selectedSeat.row === rowIndex && selectedSeat.col === (group.startIndex + colIndex) ? 'selected' : ''}}" 
                   wx:for="{{group.cols}}" 
                   wx:key="colIndex"
                   wx:for-item="col"
@@ -52,10 +46,12 @@
                   data-col="{{group.startIndex + colIndex}}"
                   bindtap="onSeatClick"
                 >
-                  <text class="seat-name" wx:if="{{row[group.startIndex + colIndex]}}">
-                    {{row[group.startIndex + colIndex].name}}
-                  </text>
-                  <text class="seat-empty" wx:else>空</text>
+                  <view class="seat-content" wx:if="{{row[group.startIndex + colIndex]}}">
+                    <text class="seat-text">{{row[group.startIndex + colIndex].name}}</text>
+                  </view>
+                  <view class="seat-content seat-content-empty" wx:else>
+                    <text class="seat-text seat-text-empty">空</text>
+                  </view>
                 </view>
               </view>
               <!-- 大组之间的间隙（最后一个大组后不显示） -->
@@ -71,7 +67,7 @@
       <view class="unassigned-title">待排列学生 ({{unassignedStudents.length}}人)</view>
       <view class="unassigned-list">
         <view 
-          class="student-tag {{draggingStudent && draggingStudent.id === student.id ? 'selected' : ''}}"
+          class="student-tag {{student.gender === 'female' ? 'female' : 'male'}} {{draggingStudent && draggingStudent.id === student.id ? 'selected' : ''}}"
           wx:for="{{unassignedStudents}}"
           wx:key="id"
           wx:for-item="student"
@@ -81,6 +77,14 @@
           <text>{{student.name}}</text>
         </view>
       </view>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="action-buttons">
+      <button class="action-btn" bindtap="showCustomLayout" size="mini">自定义布局</button>
+      <button class="action-btn" bindtap="autoArrange" size="mini" wx:if="{{isCustomMode}}">自动排列</button>
+      <button class="action-btn" bindtap="clearArrangement" size="mini" wx:if="{{isCustomMode}}">清空排列</button>
+      <button class="action-btn" bindtap="reGenerate" size="mini" wx:if="{{showSeatTable && !isCustomMode}}">重新生成</button>
     </view>
 
     <!-- 说明 -->

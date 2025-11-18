@@ -105,12 +105,16 @@ Page({
         }
       );
       
-      // 将座位表中的学生ID转换为学生信息（包含姓名）
+      // 将座位表中的学生ID转换为学生信息（包含姓名和性别）
       const seatTableWithNames = result.seatTable.map(row => 
         row.map(studentId => {
           if (!studentId) return null;
           const student = this.data.students.find(s => s.id === studentId);
-          return student ? { id: student.id, name: student.name } : { id: studentId, name: studentId };
+          return student ? { 
+            id: student.id, 
+            name: student.name, 
+            gender: student.gender || 'male' 
+          } : { id: studentId, name: studentId, gender: 'male' };
         })
       );
       
@@ -325,10 +329,11 @@ Page({
       currentIndex += groupCols;
     });
     
-    // 将所有学生放入待排列区域
+    // 将所有学生放入待排列区域（包含性别信息）
     const unassignedStudents = students.map(s => ({
       id: s.id,
-      name: s.name
+      name: s.name,
+      gender: s.gender || 'male'
     }));
     
     this.setData({
@@ -421,7 +426,11 @@ Page({
             const studentId = result.seatTable[rowIndex]?.[colIndex];
             if (studentId) {
               const student = students.find(s => s.id === studentId);
-              return student ? { id: student.id, name: student.name } : null;
+              return student ? { 
+                id: student.id, 
+                name: student.name,
+                gender: student.gender || 'male'
+              } : null;
             }
             return null;
           })
@@ -480,14 +489,18 @@ Page({
    * 清空排列
    */
   clearArrangement() {
-    const { seatTable, students } = this.data;
+    const { seatTable, unassignedStudents, students } = this.data;
     
-    // 收集所有已分配的学生
+    // 收集所有已分配的学生（保留性别信息）
     const assignedStudents = [];
     seatTable.forEach(row => {
       row.forEach(seat => {
         if (seat) {
-          assignedStudents.push({ id: seat.id, name: seat.name });
+          assignedStudents.push({ 
+            id: seat.id, 
+            name: seat.name,
+            gender: seat.gender || 'male'
+          });
         }
       });
     });
@@ -497,10 +510,20 @@ Page({
       row.map(() => null)
     );
     
+    // 合并已分配的学生和当前待排列区域的学生，去重
+    const assignedIds = new Set(assignedStudents.map(s => s.id));
+    const existingUnassignedIds = new Set(unassignedStudents.map(s => s.id));
+    
+    // 合并：已分配的学生 + 当前待排列区域的学生（去重）
+    const allUnassignedStudents = [
+      ...assignedStudents,
+      ...unassignedStudents.filter(s => !assignedIds.has(s.id))
+    ];
+    
     // 将所有学生放回待排列区域
     this.setData({
       seatTable: emptySeatTable,
-      unassignedStudents: assignedStudents,
+      unassignedStudents: allUnassignedStudents,
       seatStats: {
         totalSeats: this.data.rows * this.data.cols,
         usedSeats: 0,
@@ -570,19 +593,31 @@ Page({
     
     // 如果没有在拖拽，但有座位，选中这个座位准备拖拽
     if (seat) {
+      // 确保座位包含完整的性别信息
+      let seatWithGender = seat;
+      if (!seat.gender) {
+        const fullStudent = this.data.students.find(s => s.id === seat.id);
+        if (fullStudent) {
+          seatWithGender = {
+            id: fullStudent.id,
+            name: fullStudent.name,
+            gender: fullStudent.gender || 'male'
+          };
+        }
+      }
       // 选中新座位
       this.setData({
-        draggingStudent: seat,
+        draggingStudent: seatWithGender,
         dragStartSeat: { row: targetRow, col: targetCol },
         isDragging: true,
         selectedSeat: { row: targetRow, col: targetCol }
       });
       wx.showToast({
-        title: `已选中${seat.name}，请点击目标座位`,
+        title: `已选中${seatWithGender.name}，请点击目标座位`,
         icon: 'none',
         duration: 1500
       });
-      console.log('选中座位:', seat.name, '位置', row, col);
+      console.log('选中座位:', seatWithGender.name, '位置', row, col);
     } else {
       // 如果点击的是空座位，清除选中状态
       this.setData({
@@ -683,18 +718,45 @@ Page({
     
     const newSeatTable = seatTable.map((r, rIdx) => 
       r.map((seat, cIdx) => {
-        // 目标位置：放置拖拽的学生
+        // 目标位置：放置拖拽的学生（确保包含性别信息）
         if (rIdx === targetRow && cIdx === targetCol) {
+          // 确保 draggingStudent 包含完整的性别信息
+          if (draggingStudent && !draggingStudent.gender) {
+            const fullStudent = this.data.students.find(s => s.id === draggingStudent.id);
+            return fullStudent ? {
+              id: fullStudent.id,
+              name: fullStudent.name,
+              gender: fullStudent.gender || 'male'
+            } : draggingStudent;
+          }
           return draggingStudent;
         }
         // 如果是从座位拖拽，处理起始位置
         if (dragStartSeat && rIdx === dragStartSeat.row && cIdx === dragStartSeat.col) {
           // 如果目标位置原来有学生，交换位置（将目标位置的学生放到起始位置）
           if (currentSeat) {
+            // 确保 currentSeat 包含完整的性别信息
+            if (!currentSeat.gender) {
+              const fullStudent = this.data.students.find(s => s.id === currentSeat.id);
+              return fullStudent ? {
+                id: fullStudent.id,
+                name: fullStudent.name,
+                gender: fullStudent.gender || 'male'
+              } : currentSeat;
+            }
             return currentSeat; // 交换：将目标位置的学生放到起始位置
           }
           // 如果目标位置是空的，清空起始位置
           return null;
+        }
+        // 确保保留的座位也包含性别信息
+        if (seat && !seat.gender) {
+          const fullStudent = this.data.students.find(s => s.id === seat.id);
+          return fullStudent ? {
+            id: fullStudent.id,
+            name: fullStudent.name,
+            gender: fullStudent.gender || 'male'
+          } : seat;
         }
         return seat;
       })

@@ -65,77 +65,77 @@ export const mockQuestionnaireData = [
 // 学生数据：包含学科成绩、性格类型、互动记录
 export const mockStudentsForSeating = [
   {
-    id: 's001', name: '张小明',
+    id: 's001', name: '张小明', gender: 'male',
     scores: { math: 95, chinese: 88, english: 92, science: 90 },
     personality: { type: '外向', traits: ['活泼', '开朗', '积极'] }
   },
   {
-    id: 's002', name: '李小红',
+    id: 's002', name: '李小红', gender: 'female',
     scores: { math: 75, chinese: 92, english: 88, science: 80 },
     personality: { type: '内向', traits: ['安静', '细心', '专注'] }
   },
   {
-    id: 's003', name: '王小强',
+    id: 's003', name: '王小强', gender: 'male',
     scores: { math: 88, chinese: 75, english: 85, science: 90 },
     personality: { type: '外向', traits: ['活跃', '好动', '热情'] }
   },
   {
-    id: 's004', name: '赵小美',
+    id: 's004', name: '赵小美', gender: 'female',
     scores: { math: 82, chinese: 95, english: 90, science: 85 },
     personality: { type: '中性', traits: ['温和', '友善', '合作'] }
   },
   {
-    id: 's005', name: '孙小亮',
+    id: 's005', name: '孙小亮', gender: 'male',
     scores: { math: 70, chinese: 78, english: 72, science: 75 },
     personality: { type: '内向', traits: ['安静', '谨慎', '认真'] }
   },
   {
-    id: 's006', name: '周小静',
+    id: 's006', name: '周小静', gender: 'female',
     scores: { math: 92, chinese: 85, english: 88, science: 90 },
     personality: { type: '中性', traits: ['稳重', '负责', '可靠'] }
   },
   {
-    id: 's007', name: '吴小刚',
+    id: 's007', name: '吴小刚', gender: 'male',
     scores: { math: 85, chinese: 80, english: 75, science: 88 },
     personality: { type: '外向', traits: ['活跃', '自信', '领导'] }
   },
   {
-    id: 's008', name: '郑小芳',
+    id: 's008', name: '郑小芳', gender: 'female',
     scores: { math: 78, chinese: 90, english: 85, science: 82 },
     personality: { type: '内向', traits: ['文静', '细心', '耐心'] }
   },
   {
-    id: 's009', name: '钱小华',
+    id: 's009', name: '钱小华', gender: 'male',
     scores: { math: 90, chinese: 88, english: 92, science: 95 },
     personality: { type: '中性', traits: ['平衡', '友善', '合作'] }
   },
   {
-    id: 's010', name: '陈小丽',
+    id: 's010', name: '陈小丽', gender: 'female',
     scores: { math: 65, chinese: 70, english: 68, science: 72 },
     personality: { type: '内向', traits: ['安静', '害羞', '谨慎'] }
   },
   {
-    id: 's011', name: '林小军',
+    id: 's011', name: '林小军', gender: 'male',
     scores: { math: 88, chinese: 82, english: 85, science: 90 },
     personality: { type: '外向', traits: ['活跃', '积极', '乐观'] }
   },
   {
-    id: 's012', name: '黄小燕',
+    id: 's012', name: '黄小燕', gender: 'female',
     scores: { math: 80, chinese: 88, english: 90, science: 85 },
     personality: { type: '中性', traits: ['温和', '友善', '细心'] }
   },
   {
-    id: 's013', name: '刘小波',
+    id: 's013', name: '刘小波', gender: 'male',
     scores: { math: 72, chinese: 75, english: 70, science: 78 },
     personality: { type: '内向', traits: ['安静', '认真', '专注'] }
   },
   {
-    id: 's014', name: '徐小婷',
+    id: 's014', name: '徐小婷', gender: 'female',
     scores: { math: 85, chinese: 90, english: 88, science: 87 },
     personality: { type: '中性', traits: ['独立', '自主', '冷静'] }
   },
   {
-    id: 's015', name: '马小飞',
+    id: 's015', name: '马小飞', gender: 'male',
     scores: { math: 95, chinese: 88, english: 90, science: 92 },
     personality: { type: '外向', traits: ['活跃', '自信', '创新'] }
   }
