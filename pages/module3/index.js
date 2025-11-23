@@ -1,6 +1,6 @@
 // module3/index.js - 班委胜任力模型模块
 import { get } from '../../utils/api.js';
-import { recommendClassLeaders, getBestCandidatesForEachPosition, LEADER_POSITIONS } from '../../utils/classLeaderRecommendation.js';
+import { evaluateStudentAbilities, LEADER_POSITIONS } from '../../utils/classLeaderRecommendation.js';
 
 Page({
   /**
@@ -10,21 +10,89 @@ Page({
     title: '班委胜任力模型',
     loading: false,
     students: [],
-    recommendations: [],
-    positionCandidates: null,
-    selectedView: 'students', // 'students' 或 'positions'
-    selectedStudent: null
+    positions: [], // 岗位列表
+    hasAnyHolder: false, // 状态：是否有任何任职
+    
+    // 弹窗控制
+    showAddPositionModal: false,
+    showAppointModal: false,
+    selectedStudent: null,
+    
+    // 新增/编辑岗位数据
+    editingPosition: {
+      name: '',
+      weights: {
+        leadership: 50,
+        responsibility: 50,
+        communication: 50,
+        academic: 0,
+        organization: 0
+      }
+    },
+    
+    // 能力维度选项
+    abilityOptions: [
+      { key: 'leadership', name: '领导力' },
+      { key: 'responsibility', name: '责任心' },
+      { key: 'communication', name: '沟通力' },
+      { key: 'academic', name: '学习力' },
+      { key: 'organization', name: '组织力' },
+      { key: 'empathy', name: '同理心' },
+      { key: 'patience', name: '耐心' }
+    ],
+
+    // 任命相关
+    currentAppointingPositionId: null
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
+    this.initPositions();
     this.loadData();
   },
 
   /**
-   * 加载学生数据并生成推荐
+   * 统一更新岗位数据和任职状态
+   */
+  updatePositionsAndState(positions) {
+    const hasAnyHolder = positions && positions.some(p => p.currentHolder);
+    this.setData({
+      positions,
+      hasAnyHolder
+    });
+  },
+
+  /**
+   * 初始化默认岗位
+   */
+  initPositions() {
+    // 将 LEADER_POSITIONS 转换为数组格式，并添加 id 和 mock 的现任班委
+    const initialPositions = Object.entries(LEADER_POSITIONS).map(([key, value], index) => ({
+      id: `pos_${index}`,
+      name: value.name,
+      description: value.description,
+      // 将 0-1 的权重转换为 0-100 用于滑块显示
+      weights: Object.entries(value.requiredAbilities).reduce((acc, [k, v]) => {
+        acc[k] = v * 100;
+        return acc;
+      }, {}),
+      candidates: [], // 将计算得出的候选人列表
+      currentHolder: null // 现任班委
+    }));
+
+    // Mock 一些现任班委
+    if (initialPositions.length > 0) {
+      initialPositions[0].currentHolder = { name: '张小明', id: 's001' }; // 班长
+      initialPositions[1].currentHolder = { name: '李小红', id: 's002' }; // 学委
+    }
+
+    this.updatePositionsAndState(initialPositions);
+  },
+
+  /**
+   * 加载学生数据
    */
   async loadData() {
     this.setData({ loading: true });
@@ -32,88 +100,182 @@ Page({
     try {
       const res = await get('/api/module3/students');
       if (res.code === 200 && res.data) {
-        this.setData({
-          students: res.data
-        });
-        
-        // 生成推荐结果
-        this.generateRecommendations();
+        this.setData({ students: res.data });
+        this.calculateAllRecommendations();
       }
     } catch (error) {
       console.error('数据加载失败:', error);
-      wx.showToast({
-        title: '数据加载失败',
-        icon: 'none'
-      });
+      wx.showToast({ title: '数据加载失败', icon: 'none' });
     } finally {
       this.setData({ loading: false });
     }
   },
 
   /**
-   * 生成班委推荐结果
+   * 计算所有岗位的推荐候选人
    */
-  generateRecommendations() {
-    if (this.data.students.length === 0) {
+  calculateAllRecommendations() {
+    const { students, positions } = this.data;
+    if (!students.length || !positions.length) return;
+
+    const updatedPositions = positions.map(pos => {
+      // 计算每个学生对该岗位的匹配度
+      const candidates = students.map(student => {
+        const abilities = evaluateStudentAbilities(student);
+        let score = 0;
+        let totalWeight = 0;
+
+        // 根据权重计算加权平均分
+        Object.entries(pos.weights).forEach(([abilityKey, weight]) => {
+          const w = weight / 100; // 转换回 0-1
+          if (w > 0) {
+            score += (abilities[abilityKey] || 0) * w;
+            totalWeight += w;
+          }
+        });
+
+        const finalScore = totalWeight > 0 ? score / totalWeight : 0;
+        
+        return {
+          student: student,
+          score: finalScore,
+          percentage: Math.round(finalScore * 100)
+        };
+      });
+
+      // 排序并取前5名
+      candidates.sort((a, b) => b.score - a.score);
+      
+      return {
+        ...pos,
+        candidates: candidates.slice(0, 5)
+      };
+    });
+
+    this.updatePositionsAndState(updatedPositions);
+  },
+
+  /**
+   * 显示添加岗位弹窗
+   */
+  showAddPosition() {
+    this.setData({
+      showAddPositionModal: true,
+      editingPosition: {
+        name: '',
+        description: '自定义岗位',
+        weights: {
+          leadership: 50,
+          responsibility: 50,
+          communication: 50,
+          academic: 0,
+          organization: 0
+        }
+      }
+    });
+  },
+
+  /**
+   * 关闭添加岗位弹窗
+   */
+  closeAddPositionModal() {
+    this.setData({ showAddPositionModal: false });
+  },
+
+  /**
+   * 处理岗位名称输入
+   */
+  onPositionNameInput(e) {
+    this.setData({
+      'editingPosition.name': e.detail.value
+    });
+  },
+
+  /**
+   * 处理权重滑块变化
+   */
+  onWeightChange(e) {
+    const { key } = e.currentTarget.dataset;
+    const value = e.detail.value;
+    this.setData({
+      [`editingPosition.weights.${key}`]: value
+    });
+  },
+
+  /**
+   * 保存新岗位
+   */
+  saveNewPosition() {
+    const { editingPosition, positions } = this.data;
+    
+    if (!editingPosition.name.trim()) {
+      wx.showToast({ title: '请输入岗位名称', icon: 'none' });
       return;
     }
+
+    const newPos = {
+      id: `custom_${Date.now()}`,
+      name: editingPosition.name,
+      description: editingPosition.description || '自定义岗位',
+      weights: editingPosition.weights,
+      candidates: [],
+      currentHolder: null
+    };
+
+    const newPositions = [...positions, newPos];
     
-    try {
-      // 为所有学生生成推荐
-      const recommendations = recommendClassLeaders(this.data.students);
-      
-      // 为每个岗位生成最佳候选人
-      const positionCandidates = getBestCandidatesForEachPosition(recommendations);
-      
-      this.setData({
-        recommendations: recommendations,
-        positionCandidates: positionCandidates
-      });
-      
-      console.log('班委推荐生成成功:', recommendations);
-    } catch (error) {
-      console.error('推荐生成失败:', error);
-      wx.showToast({
-        title: '生成失败，请重试',
-        icon: 'none'
-      });
-    }
+    this.updatePositionsAndState(newPositions);
+    this.setData({ showAddPositionModal: false });
+
+    // 重新计算推荐
+    this.calculateAllRecommendations();
+    
+    wx.showToast({ title: '添加成功', icon: 'success' });
   },
 
   /**
-   * 切换视图
+   * 显示任命弹窗
    */
-  switchView(e) {
-    const view = e.currentTarget.dataset.view;
+  showAppointModal(e) {
+    const posId = e.currentTarget.dataset.id;
     this.setData({
-      selectedView: view
+      showAppointModal: true,
+      currentAppointingPositionId: posId
     });
   },
 
   /**
-   * 查看学生详情
+   * 关闭任命弹窗
    */
-  viewStudentDetail(e) {
-    const index = e.currentTarget.dataset.index;
-    const student = this.data.recommendations[index];
-    this.setData({
-      selectedStudent: student
-    });
+  closeAppointModal() {
+    this.setData({ showAppointModal: false, currentAppointingPositionId: null });
   },
 
   /**
-   * 关闭学生详情
+   * 确认任命
    */
-  closeStudentDetail() {
-    this.setData({
-      selectedStudent: null
+  confirmAppoint(e) {
+    const student = e.currentTarget.dataset.student;
+    const { currentAppointingPositionId, positions } = this.data;
+
+    const updatedPositions = positions.map(pos => {
+      if (pos.id === currentAppointingPositionId) {
+        return { ...pos, currentHolder: student };
+      }
+      return pos;
     });
+
+    this.updatePositionsAndState(updatedPositions);
+    this.setData({
+      showAppointModal: false,
+      currentAppointingPositionId: null
+    });
+
+    wx.showToast({ title: `已任命${student.name}`, icon: 'success' });
   },
 
   /**
-   * 阻止事件冒泡（用于弹窗）
+   * 阻止事件冒泡
    */
-  stopPropagation() {
-    // 空函数，用于阻止事件冒泡
-  }
+  stopPropagation() {}
 });

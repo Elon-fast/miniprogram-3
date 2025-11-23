@@ -55,3 +55,6 @@
     </view>
   </view>
 </view>
+
+<!-- 全局 AI 助手 -->
+<ai-assistant />

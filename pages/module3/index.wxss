@@ -1,305 +1,374 @@
 /* module3/index.wxss - 班委胜任力模型模块样式 */
 .container {
   min-height: 100vh;
-  background-color: #f5f5f5;
-  padding: 30rpx;
+  background-color: #f0f2f5;
+  padding: 24rpx;
+  padding-bottom: 120rpx; /* 为底部按钮留出空间 */
 }
 
 .header {
-  margin-bottom: 30rpx;
+  margin-bottom: 32rpx;
 }
 
 .title {
-  font-size: 48rpx;
-  font-weight: bold;
-  color: #333;
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #1f2937;
 }
 
-.view-tabs {
-  display: flex;
+.section-card {
   background-color: #fff;
-  border-radius: 16rpx;
-  padding: 8rpx;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
   margin-bottom: 24rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
 }
 
-.tab-item {
-  flex: 1;
-  text-align: center;
-  padding: 16rpx;
+.section-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 24rpx;
+  display: block;
+}
+
+/* 现任班委滚动 */
+.leaders-scroll {
+  display: flex;
+  flex-direction: row;
+  white-space: nowrap;
+  gap: 24rpx;
+  padding-bottom: 16rpx; /* 为滚动条留空间 */
+}
+
+.leader-card {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f9fafb;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  min-width: 160rpx;
+  border: 1px solid #f3f4f6;
+}
+
+.leader-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background-color: #dbeafe;
+  color: #3b82f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  font-weight: bold;
+  margin-bottom: 12rpx;
+}
+
+.leader-name {
   font-size: 28rpx;
-  color: #666;
-  border-radius: 12rpx;
-  transition: all 0.3s;
-}
-
-.tab-item.active {
-  background-color: #1890ff;
-  color: #fff;
   font-weight: 600;
+  color: #374151;
+  margin-bottom: 4rpx;
 }
 
-.loading {
-  text-align: center;
-  padding: 100rpx 0;
-  color: #999;
-  font-size: 28rpx;
+.leader-role {
+  font-size: 22rpx;
+  color: #6b7280;
+  background-color: #e5e7eb;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
 }
 
-.content {
+/* 岗位列表 */
+.positions-container {
   display: flex;
   flex-direction: column;
   gap: 24rpx;
 }
 
-/* 学生视角样式 */
-.student-card {
-  background-color: #fff;
-  border-radius: 16rpx;
-  padding: 30rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
-}
-
-.student-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24rpx;
-}
-
-.student-name {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #333;
-}
-
-.recommendation-badge {
-  background-color: #52c41a;
-  color: #fff;
-  padding: 8rpx 16rpx;
-  border-radius: 8rpx;
-  font-size: 24rpx;
-}
-
-.position-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16rpx;
-}
-
-.position-item {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-}
-
-.position-name {
-  width: 160rpx;
-  font-size: 26rpx;
-  color: #333;
-}
-
-.fitness-bar {
-  flex: 1;
-  height: 16rpx;
-  background-color: #f0f0f0;
-  border-radius: 8rpx;
-  overflow: hidden;
-}
-
-.fitness-fill {
-  height: 100%;
-  background: linear-gradient(to right, #1890ff, #52c41a);
-  border-radius: 8rpx;
-  transition: width 0.3s;
-}
-
-.fitness-value {
-  width: 80rpx;
-  text-align: right;
-  font-size: 24rpx;
-  color: #666;
-  font-weight: 600;
-}
-
-/* 岗位视角样式 */
 .position-card {
   background-color: #fff;
-  border-radius: 16rpx;
-  padding: 30rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+  border-radius: 24rpx;
+  padding: 32rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
 }
 
 .position-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 24rpx;
+  border-bottom: 1px solid #f3f4f6;
   padding-bottom: 20rpx;
-  border-bottom: 2rpx solid #f0f0f0;
 }
 
-.position-title {
+.position-info {
+  flex: 1;
+}
+
+.position-name {
   font-size: 32rpx;
-  font-weight: 600;
-  color: #333;
+  font-weight: 700;
+  color: #1f2937;
   display: block;
   margin-bottom: 8rpx;
 }
 
 .position-desc {
   font-size: 24rpx;
-  color: #666;
+  color: #6b7280;
 }
 
+.appoint-btn {
+  background-color: #e0e7ff !important;
+  color: #4338ca !important;
+  font-size: 24rpx !important;
+  border-radius: 30rpx !important;
+  padding: 8rpx 24rpx !important;
+  margin: 0 !important;
+}
+
+/* 候选人列表 */
 .candidates-list {
   display: flex;
   flex-direction: column;
-  gap: 20rpx;
+  gap: 16rpx;
 }
 
 .candidate-item {
   display: flex;
   align-items: center;
-  gap: 16rpx;
-  padding: 16rpx;
-  background-color: #f8f9fa;
-  border-radius: 12rpx;
+  gap: 20rpx;
 }
 
 .candidate-rank {
-  width: 48rpx;
-  height: 48rpx;
-  background-color: #1890ff;
-  color: #fff;
+  width: 40rpx;
+  height: 40rpx;
   border-radius: 50%;
+  background-color: #f3f4f6;
+  color: #6b7280;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24rpx;
   font-weight: bold;
+  flex-shrink: 0;
 }
+
+.rank-1 { background-color: #fef3c7; color: #d97706; }
+.rank-2 { background-color: #f1f5f9; color: #475569; }
+.rank-3 { background-color: #fff7ed; color: #ea580c; }
 
 .candidate-info {
   flex: 1;
   display: flex;
-  flex-direction: column;
-  gap: 8rpx;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .candidate-name {
   font-size: 28rpx;
-  font-weight: 600;
-  color: #333;
+  color: #374151;
+  width: 120rpx;
 }
 
-.candidate-fitness {
+.fitness-bar-container {
+  flex: 1;
   display: flex;
   align-items: center;
   gap: 16rpx;
 }
 
-/* 弹窗样式 */
+.fitness-bar {
+  flex: 1;
+  height: 12rpx;
+  background-color: #f3f4f6;
+  border-radius: 6rpx;
+  overflow: hidden;
+}
+
+.fitness-fill {
+  height: 100%;
+  background-color: #3b82f6;
+  border-radius: 6rpx;
+}
+
+.fitness-value {
+  font-size: 24rpx;
+  color: #3b82f6;
+  font-weight: 600;
+  width: 60rpx;
+  text-align: right;
+}
+
+/* 底部按钮 */
+.add-btn-container {
+  position: fixed;
+  bottom: 40rpx;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  padding: 0 40rpx;
+  z-index: 100;
+}
+
+.add-position-btn {
+  background-color: #3b82f6;
+  color: #fff;
+  border-radius: 40rpx;
+  font-size: 30rpx;
+  padding: 20rpx 60rpx;
+  box-shadow: 0 8rpx 24rpx rgba(59, 130, 246, 0.4);
+  width: 100%;
+}
+
+/* 弹窗通用 */
 .modal {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100%;
+  height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .modal-content {
-  width: 90%;
-  max-height: 80vh;
+  width: 85%;
   background-color: #fff;
-  border-radius: 16rpx;
+  border-radius: 24rpx;
   overflow: hidden;
+  max-height: 80vh;
   display: flex;
   flex-direction: column;
 }
 
 .modal-header {
+  padding: 32rpx;
+  border-bottom: 1px solid #f3f4f6;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 30rpx;
-  border-bottom: 2rpx solid #f0f0f0;
 }
 
 .modal-title {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #333;
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #1f2937;
 }
 
 .modal-close {
-  font-size: 48rpx;
-  color: #999;
+  font-size: 40rpx;
+  color: #9ca3af;
+  padding: 0 16rpx;
   line-height: 1;
 }
 
 .modal-body {
-  flex: 1;
+  padding: 32rpx;
   overflow-y: auto;
-  padding: 30rpx;
 }
 
-.detail-position-item {
+.modal-footer {
+  padding: 24rpx 32rpx;
+  border-top: 1px solid #f3f4f6;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* 表单样式 */
+.form-item {
+  margin-bottom: 32rpx;
+}
+
+.form-label {
+  display: block;
+  font-size: 28rpx;
+  color: #4b5563;
+  margin-bottom: 16rpx;
+  font-weight: 500;
+}
+
+.form-input {
+  width: 100%;
+  height: 80rpx;
+  border: 1px solid #e5e7eb;
+  border-radius: 12rpx;
+  padding: 0 24rpx;
+  font-size: 28rpx;
+  box-sizing: border-box;
+}
+
+.weight-item {
   margin-bottom: 24rpx;
-  padding-bottom: 24rpx;
-  border-bottom: 1rpx solid #f0f0f0;
 }
 
-.detail-position-item:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
-  padding-bottom: 0;
+.weight-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8rpx;
 }
 
-.detail-position-header {
+.weight-name {
+  font-size: 26rpx;
+  color: #6b7280;
+}
+
+.weight-value {
+  font-size: 26rpx;
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+.confirm-btn {
+  background-color: #3b82f6;
+  color: #fff;
+  border-radius: 30rpx;
+  font-size: 30rpx;
+  padding: 16rpx 48rpx;
+}
+
+/* 候选人选择样式 */
+.candidate-select-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.candidate-select-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12rpx;
+  padding: 24rpx;
+  background-color: #f9fafb;
+  border-radius: 12rpx;
+  border: 1px solid #f3f4f6;
 }
 
-.detail-position-name {
-  font-size: 28rpx;
+.candidate-select-item:active {
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.candidate-select-name {
+  font-size: 30rpx;
   font-weight: 600;
-  color: #333;
+  color: #374151;
+  display: block;
+  margin-bottom: 4rpx;
 }
 
-.detail-position-percent {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #1890ff;
-}
-
-.detail-fitness-bar {
-  height: 20rpx;
-  background-color: #f0f0f0;
-  border-radius: 10rpx;
-  overflow: hidden;
-  margin-bottom: 12rpx;
-}
-
-.detail-fitness-fill {
-  height: 100%;
-  background: linear-gradient(to right, #1890ff, #52c41a);
-  border-radius: 10rpx;
-}
-
-.detail-position-desc {
+.candidate-select-score {
   font-size: 24rpx;
-  color: #666;
+  color: #3b82f6;
 }
 
-.empty {
-  text-align: center;
-  padding: 100rpx 0;
-  color: #999;
-  font-size: 28rpx;
+.select-icon {
+  font-size: 32rpx;
 }

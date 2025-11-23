@@ -1,0 +1,56 @@
+<view class="ai-container">
+  <!-- 悬浮球 -->
+  <view class="floating-ball {{expanded ? 'hidden' : ''}}" bindtap="toggleExpand">
+    <text class="icon">🎙️</text>
+  </view>
+
+  <!-- 聊天面板 -->
+  <view class="chat-panel {{expanded ? 'visible' : ''}}">
+    <view class="panel-header">
+      <text class="title">AI 助手</text>
+      <view class="close-btn" bindtap="toggleExpand">×</view>
+    </view>
+
+    <scroll-view class="chat-history" scroll-y scroll-into-view="{{scrollIntoView}}">
+      <view class="welcome-msg" wx:if="{{chatHistory.length === 0}}">
+        <text>你好！我是你的班级管理助手。\n你可以问我：“怎么排座位？” 或者 “分析一下班级生态”</text>
+      </view>
+      
+      <block wx:for="{{chatHistory}}" wx:key="index">
+        <!-- 用户消息 -->
+        <view class="message-item user" wx:if="{{item.role === 'user'}}">
+          <view class="bubble">{{item.content}}</view>
+          <view class="avatar user-avatar">我</view>
+        </view>
+        <!-- AI 消息 -->
+        <view class="message-item ai" wx:else>
+          <view class="avatar ai-avatar">AI</view>
+          <view class="bubble">{{item.content}}</view>
+        </view>
+      </block>
+      <view id="bottom-anchor"></view>
+    </scroll-view>
+
+    <view class="panel-footer">
+      <view 
+        class="record-btn {{isRecording ? 'recording' : ''}}" 
+        catchtouchstart="startRecord" 
+        catchtouchend="stopRecord"
+        catchtouchcancel="stopRecord"
+      >
+        <text>{{isRecording ? '松开 结束' : '按住 说话'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 录音状态提示 -->
+  <view class="recording-toast" wx:if="{{isRecording}}">
+    <view class="wave-container">
+      <view class="wave"></view>
+      <view class="wave"></view>
+      <view class="wave"></view>
+    </view>
+    <text class="toast-text">正在聆听...</text>
+  </view>
+</view>
+

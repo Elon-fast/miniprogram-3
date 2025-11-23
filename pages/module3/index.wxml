@@ -4,65 +4,42 @@
     <text class="title">{{title}}</text>
   </view>
 
-  <!-- 视图切换 -->
-  <view class="view-tabs" wx:if="{{!loading && recommendations.length > 0}}">
-    <view 
-      class="tab-item {{selectedView === 'students' ? 'active' : ''}}"
-      data-view="students"
-      bindtap="switchView"
-    >
-      学生视角
-    </view>
-    <view 
-      class="tab-item {{selectedView === 'positions' ? 'active' : ''}}"
-      data-view="positions"
-      bindtap="switchView"
-    >
-      岗位视角
-    </view>
-  </view>
-
-  <!-- 加载状态 -->
-  <view class="loading" wx:if="{{loading}}">
-    <text>分析中...</text>
-  </view>
-
-  <!-- 学生视角 -->
-  <view class="content" wx:if="{{!loading && selectedView === 'students' && recommendations.length > 0}}">
-    <view class="student-card" wx:for="{{recommendations}}" wx:key="student.id" data-index="{{index}}" bindtap="viewStudentDetail">
-      <view class="student-header">
-        <text class="student-name">{{item.student.name}}</text>
-        <view class="recommendation-badge" wx:if="{{item.recommendedPosition}}">
-          <text>推荐: {{item.recommendedPosition.name}}</text>
-        </view>
+  <!-- 1. 现任班委公示 -->
+  <view class="section-card current-leaders-section" wx:if="{{positions.length > 0}}">
+    <view class="section-title">🏆 现任班委</view>
+    <scroll-view class="leaders-scroll" scroll-x="true" enable-flex="true">
+      <view class="leader-card" wx:for="{{positions}}" wx:key="id" wx:if="{{item.currentHolder}}">
+        <view class="leader-avatar">{{item.currentHolder.name[0]}}</view>
+        <text class="leader-name">{{item.currentHolder.name}}</text>
+        <text class="leader-role">{{item.name}}</text>
       </view>
-      
-      <view class="position-list">
-        <view class="position-item" wx:for="{{item.sortedPositions}}" wx:key="name" wx:for-item="pos">
-          <text class="position-name">{{pos.name}}</text>
-          <view class="fitness-bar">
-            <view class="fitness-fill" style="width: {{pos.percentage}}%"></view>
-          </view>
-          <text class="fitness-value">{{pos.percentage}}%</text>
-        </view>
+      <view class="leader-card empty" wx:if="{{!hasAnyHolder}}">
+        <text class="empty-text">暂无任命</text>
       </view>
-    </view>
+    </scroll-view>
   </view>
 
-  <!-- 岗位视角 -->
-  <view class="content" wx:if="{{!loading && selectedView === 'positions' && positionCandidates}}">
-    <view class="position-card" wx:for="{{positionCandidates}}" wx:key="position.name" wx:for-item="posData">
+  <!-- 2. 岗位管理与推荐 -->
+  <view class="positions-container">
+    <view class="section-title-row">
+      <text class="section-title">📋 岗位胜任力推荐</text>
+    </view>
+
+    <view class="position-card" wx:for="{{positions}}" wx:key="id">
       <view class="position-header">
-        <text class="position-title">{{posData.position.name}}</text>
-        <text class="position-desc">{{posData.position.description}}</text>
+        <view class="position-info">
+          <text class="position-name">{{item.name}}</text>
+          <text class="position-desc">{{item.description}}</text>
+        </view>
+        <button class="appoint-btn" size="mini" bindtap="showAppointModal" data-id="{{item.id}}">任命</button>
       </view>
-      
+
       <view class="candidates-list">
-        <view class="candidate-item" wx:for="{{posData.candidates}}" wx:key="student.id" wx:for-item="candidate">
-          <view class="candidate-rank">{{index + 1}}</view>
+        <view class="candidate-item" wx:for="{{item.candidates}}" wx:key="student.id" wx:for-item="candidate" wx:for-index="idx">
+          <view class="candidate-rank rank-{{idx + 1}}">{{idx + 1}}</view>
           <view class="candidate-info">
             <text class="candidate-name">{{candidate.student.name}}</text>
-            <view class="candidate-fitness">
+            <view class="fitness-bar-container">
               <view class="fitness-bar">
                 <view class="fitness-fill" style="width: {{candidate.percentage}}%"></view>
               </view>
@@ -74,30 +51,82 @@
     </view>
   </view>
 
-  <!-- 学生详情弹窗 -->
-  <view class="modal" wx:if="{{selectedStudent}}" bindtap="closeStudentDetail">
+  <!-- 底部添加按钮 -->
+  <view class="add-btn-container">
+    <button class="add-position-btn" bindtap="showAddPosition">+ 添加自定义岗位</button>
+  </view>
+
+  <!-- 添加岗位弹窗 -->
+  <view class="modal" wx:if="{{showAddPositionModal}}" bindtap="closeAddPositionModal">
     <view class="modal-content" catchtap="stopPropagation">
       <view class="modal-header">
-        <text class="modal-title">{{selectedStudent.student.name}} - 岗位适配度</text>
-        <text class="modal-close" bindtap="closeStudentDetail">×</text>
+        <text class="modal-title">添加自定义岗位</text>
+        <text class="modal-close" bindtap="closeAddPositionModal">×</text>
       </view>
       <view class="modal-body">
-        <view class="detail-position-item" wx:for="{{selectedStudent.sortedPositions}}" wx:key="name">
-          <view class="detail-position-header">
-            <text class="detail-position-name">{{item.name}}</text>
-            <text class="detail-position-percent">{{item.percentage}}%</text>
-          </view>
-          <view class="detail-fitness-bar">
-            <view class="detail-fitness-fill" style="width: {{item.percentage}}%"></view>
-          </view>
-          <text class="detail-position-desc">{{item.position.description}}</text>
+        <view class="form-item">
+          <text class="form-label">岗位名称</text>
+          <input class="form-input" placeholder="例如：卫生委员" value="{{editingPosition.name}}" bindinput="onPositionNameInput" />
         </view>
+        
+        <view class="form-item">
+          <text class="form-label">能力权重配置 (总和不限，自动归一化)</text>
+          <view class="weights-list">
+            <view class="weight-item" wx:for="{{abilityOptions}}" wx:key="key">
+              <view class="weight-header">
+                <text class="weight-name">{{item.name}}</text>
+                <text class="weight-value">{{editingPosition.weights[item.key]}}</text>
+              </view>
+              <slider 
+                min="0" max="100" step="10" 
+                value="{{editingPosition.weights[item.key]}}" 
+                data-key="{{item.key}}" 
+                bindchange="onWeightChange"
+                activeColor="#1890ff"
+                block-size="12"
+              />
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="confirm-btn" bindtap="saveNewPosition">确认添加</button>
       </view>
     </view>
   </view>
 
-  <!-- 空状态 -->
-  <view class="empty" wx:if="{{!loading && recommendations.length === 0}}">
-    <text>暂无数据</text>
+  <!-- 任命选择弹窗 -->
+  <view class="modal" wx:if="{{showAppointModal}}" bindtap="closeAppointModal">
+    <view class="modal-content" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">选择任命人选</text>
+        <text class="modal-close" bindtap="closeAppointModal">×</text>
+      </view>
+      <view class="modal-body">
+        <block wx:for="{{positions}}" wx:key="id">
+          <view wx:if="{{item.id === currentAppointingPositionId}}">
+            <view class="candidate-select-list">
+              <view 
+                class="candidate-select-item" 
+                wx:for="{{item.candidates}}" 
+                wx:key="student.id" 
+                wx:for-item="candidate"
+                bindtap="confirmAppoint"
+                data-student="{{candidate.student}}"
+              >
+                <view class="candidate-select-info">
+                  <text class="candidate-select-name">{{candidate.student.name}}</text>
+                  <text class="candidate-select-score">匹配度: {{candidate.percentage}}%</text>
+                </view>
+                <view class="select-icon">👉</view>
+              </view>
+            </view>
+          </view>
+        </block>
+      </view>
+    </view>
   </view>
+
+  <!-- 全局 AI 助手 -->
+  <ai-assistant />
 </view>

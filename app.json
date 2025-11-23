@@ -14,5 +14,9 @@
   "style": "v2",
   "componentFramework": "glass-easel",
   "sitemapLocation": "sitemap.json",
-  "lazyCodeLoading": "requiredComponents"
+  "lazyCodeLoading": "requiredComponents",
+  "usingComponents": {
+    "ai-assistant": "/components/ai-assistant/index",
+    "ec-canvas": "/components/ec-canvas/ec-canvas"
+  }
 }

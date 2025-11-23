@@ -3,7 +3,7 @@
   <view class="header">
     <text class="title">{{title}}</text>
   </view>
-
+  
   <!-- 加载状态 -->
   <view class="loading" wx:if="{{loading}}">
     <text>加载中...</text>
@@ -124,7 +124,7 @@
           <view class="dropdown-icon {{showAutoArrangeSettings ? 'expanded' : ''}}">▼</view>
         </view>
         
-                <!-- 自动排列设置面板 -->
+        <!-- 自动排列设置面板 -->
         <view class="auto-arrange-container">
           <view class="auto-arrange-settings {{showAutoArrangeSettings ? 'show' : ''}}" wx:if="{{showAutoArrangeSettings}}">
             <view class="settings-title">影响因子权重设置</view>
@@ -219,59 +219,62 @@
   <view class="empty" wx:if="{{!loading && !showSeatTable}}">
     <text>暂无数据</text>
   </view>
-</view>
-
-<!-- 自定义布局弹窗 -->
-<view class="layout-modal" wx:if="{{showLayoutModal}}" bindtap="closeLayoutModal">
-  <view class="modal-content" catchtap="stopPropagation">
-    <view class="modal-header">
-      <text class="modal-title">自定义布局</text>
-      <text class="modal-close" bindtap="closeLayoutModal">×</text>
-    </view>
-    <view class="modal-body">
-      <view class="input-group">
-        <text class="input-label">行数:</text>
-        <input 
-          class="input-field" 
-          type="number" 
-          value="{{customRows}}" 
-          bindinput="onRowInput"
-          placeholder="请输入行数(1-10)"
-        />
+  
+  <!-- 自定义布局弹窗 -->
+  <view class="layout-modal" wx:if="{{showLayoutModal}}" bindtap="closeLayoutModal">
+    <view class="modal-content" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">自定义布局</text>
+        <text class="modal-close" bindtap="closeLayoutModal">×</text>
       </view>
-      <view class="input-group">
-        <text class="input-label">列数:</text>
-        <input 
-          class="input-field" 
-          type="number" 
-          value="{{customCols}}" 
-          bindinput="onColInput"
-          placeholder="请输入列数(1-10)"
-        />
+      <view class="modal-body">
+        <view class="input-group">
+          <text class="input-label">行数:</text>
+          <input 
+            class="input-field" 
+            type="number" 
+            value="{{customRows}}" 
+            bindinput="onRowInput"
+            placeholder="请输入行数(1-10)"
+          />
+        </view>
+        <view class="input-group">
+          <text class="input-label">列数:</text>
+          <input 
+            class="input-field" 
+            type="number" 
+            value="{{customCols}}" 
+            bindinput="onColInput"
+            placeholder="请输入列数(1-10)"
+          />
+        </view>
+        <view class="input-group">
+          <text class="input-label">大组列数:</text>
+          <input 
+            class="input-field" 
+            type="text" 
+            value="{{groupCols}}" 
+            bindinput="onGroupColsInput"
+            placeholder="如: 242 或 2"
+          />
+        </view>
+        <view class="modal-tips">
+          <text>💡 提示：</text>
+          <text>• 设置行列后，所有学生将进入待排列区域，您可以手动拖拽排列</text>
+          <text>• 大组列数：输入单个数字(如"2")表示每个大组都是该列数</text>
+          <text>• 输入连续数字(如"242")表示从左到右每个大组的列数，总和需等于总列数</text>
+        </view>
       </view>
-      <view class="input-group">
-        <text class="input-label">大组列数:</text>
-        <input 
-          class="input-field" 
-          type="text" 
-          value="{{groupCols}}" 
-          bindinput="onGroupColsInput"
-          placeholder="如: 242 或 2"
-        />
+      <view class="modal-footer">
+        <button class="modal-btn cancel" bindtap="closeLayoutModal">取消</button>
+        <button class="modal-btn confirm" bindtap="confirmCustomLayout">确定</button>
       </view>
-      <view class="modal-tips">
-        <text>💡 提示：</text>
-        <text>• 设置行列后，所有学生将进入待排列区域，您可以手动拖拽排列</text>
-        <text>• 大组列数：输入单个数字(如"2")表示每个大组都是该列数</text>
-        <text>• 输入连续数字(如"242")表示从左到右每个大组的列数，总和需等于总列数</text>
-      </view>
-    </view>
-    <view class="modal-footer">
-      <button class="modal-btn cancel" bindtap="closeLayoutModal">取消</button>
-      <button class="modal-btn confirm" bindtap="confirmCustomLayout">确定</button>
     </view>
   </view>
-</view>
 
-<!-- 隐藏的Canvas，用于生成图片 -->
-<canvas type="2d" id="exportCanvas" style="position:fixed; left:100%; top:0; width: {{canvasWidth}}px; height: {{canvasHeight}}px; opacity: 0; pointer-events: none;"></canvas>
+  <!-- 隐藏的Canvas，用于生成图片 -->
+  <canvas type="2d" id="exportCanvas" style="position:fixed; left:100%; top:0; width: {{canvasWidth}}px; height: {{canvasHeight}}px; opacity: 0; pointer-events: none;"></canvas>
+
+  <!-- 全局 AI 助手 -->
+  <ai-assistant />
+</view>
