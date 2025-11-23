@@ -626,16 +626,43 @@ Page({
    * 显示学生详情
    */
   showStudentDetail(e) {
-    const studentId = e.currentTarget.dataset.studentId;
-    if (!studentId || !this.data.studentsPsychologyData) return;
+    const student = e.currentTarget.dataset.student;
+    if (!student) return;
     
-    const student = this.data.studentsPsychologyData.find(s => s.studentId === studentId);
-    if (student) {
-      this.setData({
-        selectedStudent: student,
-        showStudentDetail: true
-      });
+    // 尝试从心理数据中找到更详细的信息
+    let detailedInfo = null;
+    if (this.data.studentsPsychologyData) {
+      detailedInfo = this.data.studentsPsychologyData.find(s => s.studentId === student.id || s.name === student.name);
     }
+    
+    // 如果没有心理数据，使用基本信息构建一个临时对象
+    if (!detailedInfo) {
+      detailedInfo = {
+        ...student,
+        dimensionScores: [] // 如果没有心理数据，则为空数组
+      };
+    }
+
+    // 查找该学生在网络分析结果中的数据，添加社交指标
+    let socialData = null;
+    if (this.data.analysisResult && this.data.analysisResult.studentList) {
+      socialData = this.data.analysisResult.studentList.find(s => s.id === student.id || s.name === student.name);
+    }
+    
+    if (socialData) {
+      detailedInfo.socialStats = [
+        { label: '朋友圈大小', value: socialData.degree || 0, desc: '互动人数' },
+        { label: '人缘指数', value: socialData.degreeCentralityFormatted + '%', desc: '受欢迎程度' },
+        { label: '桥梁指数', value: socialData.betweennessCentralityFormatted + '%', desc: '沟通协调力' }
+      ];
+    }
+    
+    console.log('查看学生详情:', detailedInfo);
+    
+    this.setData({
+      selectedStudent: detailedInfo,
+      showStudentDetail: true
+    });
   },
 
   /**
@@ -688,27 +715,38 @@ Page({
   },
 
   /**
-   * 显示节点详情
+   * 显示节点详情（复用学生详情弹窗）
    */
   showNodeDetail(nodeData) {
-    this.setData({
-      selectedNodeInfo: {
-        name: nodeData.name,
-        degree: nodeData.degree || 0,
-        degreeCentrality: ((nodeData.degreeCentrality || 0) * 100).toFixed(1),
-        betweennessCentrality: ((nodeData.betweennessCentrality || 0) * 100).toFixed(1)
-      },
-      showNodeModal: true
-    });
-  },
+    console.log('显示节点详情:', nodeData);
+    const studentId = nodeData.id;
+    const studentName = nodeData.name;
 
-  /**
-   * 关闭节点详情弹窗
-   */
-  closeNodeModal() {
+    // 尝试从心理数据中找到更详细的信息
+    let detailedInfo = null;
+    if (this.data.studentsPsychologyData) {
+      detailedInfo = this.data.studentsPsychologyData.find(s => s.studentId === studentId || s.name === studentName);
+    }
+
+    // 如果没有心理数据，使用节点的基本信息构建一个临时对象
+    if (!detailedInfo) {
+      detailedInfo = {
+        id: studentId,
+        name: studentName,
+        dimensionScores: [] // 如果没有心理数据，则为空数组
+      };
+    }
+
+    // 添加通俗化的社交指标
+    detailedInfo.socialStats = [
+      { label: '朋友圈大小', value: nodeData.degree || 0, desc: '互动人数' },
+      { label: '人缘指数', value: ((nodeData.degreeCentrality || 0) * 100).toFixed(1) + '%', desc: '受欢迎程度' },
+      { label: '桥梁指数', value: ((nodeData.betweennessCentrality || 0) * 100).toFixed(1) + '%', desc: '沟通协调力' }
+    ];
+
     this.setData({
-      showNodeModal: false,
-      selectedNodeInfo: null
+      selectedStudent: detailedInfo,
+      showStudentDetail: true
     });
   },
 

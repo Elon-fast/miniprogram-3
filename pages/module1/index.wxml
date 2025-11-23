@@ -12,30 +12,70 @@
 
   <!-- 分析结果 -->
   <view class="content" wx:if="{{!loading && analysisResult}}">
-    <!-- 网络统计 -->
+    
+    <!-- 1. 班级人际概览 (原网络统计) -->
     <view class="stats-card">
-      <view class="stats-title">网络统计</view>
+      <view class="card-header">
+        <view class="card-title-wrapper">
+          <text class="card-icon">👥</text>
+          <text class="stats-title">班级人际概览</text>
+        </view>
+      </view>
       <view class="stats-grid">
         <view class="stat-item">
           <text class="stat-value">{{analysisResult.networkStats.totalStudents}}</text>
-          <text class="stat-label">总学生数</text>
+          <text class="stat-label">班级人数</text>
         </view>
         <view class="stat-item">
           <text class="stat-value">{{analysisResult.networkStats.totalConnections}}</text>
-          <text class="stat-label">总连接数</text>
+          <text class="stat-label">互动总频次</text>
         </view>
         <view class="stat-item">
           <text class="stat-value">{{analysisResult.networkStats.averageDegreeFormatted}}</text>
-          <text class="stat-label">平均度数</text>
+          <text class="stat-label">人均朋友数</text>
         </view>
       </view>
     </view>
 
-    <!-- 关系图 -->
+    <!-- 2. 社交风险预警 (新增功能) -->
+    <view class="risk-card" wx:if="{{analysisResult.isolated.length > 0 || concernGroups.length > 0}}">
+      <view class="card-header warning-header">
+        <view class="card-title-wrapper">
+          <text class="card-icon">🔔</text>
+          <text class="stats-title">社交风险预警</text>
+        </view>
+      </view>
+      
+      <view class="risk-section" wx:if="{{analysisResult.isolated.length > 0}}">
+        <view class="risk-title">需关注学生 (孤岛效应)</view>
+        <view class="risk-desc">以下学生在调查中未被他人提及或很少提及，建议老师多加关照：</view>
+        <view class="student-tags">
+          <view class="student-tag warning" wx:for="{{analysisResult.isolated}}" wx:key="id" bindtap="showStudentDetail" data-student="{{item}}">
+            {{item.name}}
+          </view>
+        </view>
+      </view>
+
+      <view class="risk-section" wx:if="{{concernGroups.length > 0}}">
+        <view class="risk-title">需关注小团体 (封闭圈子)</view>
+        <view class="risk-desc">以下小团体内部互动频繁但与外部隔绝，可能存在排他性：</view>
+        <view class="group-list">
+          <view class="group-item warning" wx:for="{{concernGroups}}" wx:key="id">
+            <text class="group-name">{{item.name}}</text>
+            <view class="group-members">
+              <text wx:for="{{item.members}}" wx:key="*this" wx:for-item="member">{{member}} </text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 3. 社交网络关系图 -->
     <view class="graph-card" wx:if="{{analysisResult}}">
       <view class="graph-header">
         <view class="graph-title-wrapper">
-          <text class="graph-title">📊 社交网络关系图</text>
+          <text class="card-icon">🕸️</text>
+          <text class="graph-title">班级社交网络图</text>
           <view class="help-icon" bindtap="showHelp">
             <text>❓</text>
           </view>
@@ -50,40 +90,39 @@
           class="ec-canvas"
         ></ec-canvas>
       </view>
-      <view class="graph-tips">
-        <text>💡 提示：拖动节点可移动，滚轮或双指可缩放，点击节点查看详情</text>
+      <view class="graph-legend">
+        <view class="legend-item"><view class="dot leader"></view><text>核心人物</text></view>
+        <view class="legend-item"><view class="dot normal"></view><text>普通学生</text></view>
+        <view class="legend-item"><view class="dot isolated"></view><text>需关注</text></view>
       </view>
     </view>
 
-    <!-- 班级整体心理状态 -->
+    <!-- 4. 班级整体心理状态 -->
     <view class="psychology-card" wx:if="{{classPsychology}}">
-      <view class="section-title">💚 班级整体心理状态</view>
-      <view class="psychology-overview">
-        <view class="atmosphere-badge {{classPsychology.classAtmosphere === '正常' ? 'normal' : classPsychology.classAtmosphere === '阳光积极' ? 'positive' : 'concern'}}">
-          <text class="atmosphere-label">整体氛围</text>
-          <text class="atmosphere-value">{{classPsychology.classAtmosphere}}</text>
-        </view>
-        <view class="psychology-stats">
-          <view class="psychology-stat-item" wx:if="{{classPsychology.concernDimensions.length > 0}}">
-            <text class="stat-label">关注维度:</text>
-            <text class="stat-value">{{classPsychology.concernDimensions.length}}个</text>
-          </view>
-          <view class="psychology-stat-item">
-            <text class="stat-label">评估学生:</text>
-            <text class="stat-value">{{classPsychology.totalStudents}}人</text>
-          </view>
-        </view>
-      </view>
-      <view class="concern-dimensions" wx:if="{{classPsychology.concernDimensions.length > 0}}">
-        <text class="concern-title">需要关注的维度：</text>
-        <view class="dimension-tags">
-          <view class="dimension-tag" wx:for="{{classPsychology.concernDimensions}}" wx:key="dimension">
-            <text>{{item.name}} ({{item.scoreFormatted}})</text>
-          </view>
+      <view class="card-header">
+        <view class="card-title-wrapper">
+          <text class="card-icon">❤️</text>
+          <text class="section-title">班级心理晴雨表</text>
         </view>
       </view>
       
-      <!-- 各维度详细数据 -->
+      <view class="psychology-overview">
+        <view class="atmosphere-container">
+          <view class="atmosphere-label">整体氛围</view>
+          <view class="atmosphere-badge {{classPsychology.classAtmosphere === '正常' ? 'normal' : classPsychology.classAtmosphere === '阳光积极' ? 'positive' : 'concern'}}">
+            {{classPsychology.classAtmosphere}}
+          </view>
+        </view>
+        
+        <!-- 互动建议 (新增) -->
+        <view class="suggestion-box" wx:if="{{classPsychology.concernDimensions.length > 0}}">
+          <view class="suggestion-title">💡 改进建议</view>
+          <view class="suggestion-content">
+            班级在 <text class="highlight">{{classPsychology.concernDimensions[0].name}}</text> 方面得分较高，建议开展相关主题班会或团体辅导活动。
+          </view>
+        </view>
+      </view>
+
       <view class="dimensions-detail-section">
         <view class="dimensions-chart-container" wx:if="{{ecClassDimensions.onInit}}">
           <ec-canvas 
@@ -95,147 +134,45 @@
         </view>
         
         <view class="dimensions-list">
+          <view class="list-header">
+            <text>维度名称</text>
+            <text>班级均值</text>
+            <text>合理区间</text>
+          </view>
           <view class="dimension-item" wx:for="{{classPsychology.dimensionList}}" wx:key="key">
             <view class="dimension-info">
               <text class="dimension-name">{{item.name}}</text>
-              <view class="dimension-status-badge {{item.status === '正常' ? 'normal' : item.status === '关注' ? 'warning' : 'danger'}}">
-                <text>{{item.status}}</text>
-              </view>
             </view>
-            <view class="dimension-scores">
-              <text class="score-label">班级均值:</text>
-              <text class="score-value">{{item.averageFormatted}}</text>
-              <text class="threshold-label">合理区间:</text>
-              <text class="threshold-value">0 - {{item.thresholdFormatted}}</text>
+            <view class="dimension-value">
+              <text class="score {{item.status === 'concern' ? 'concern' : ''}}">{{item.averageFormatted}}</text>
+            </view>
+            <view class="dimension-range">
+              <text class="range-text">1.0 - 2.5</text>
             </view>
           </view>
         </view>
       </view>
     </view>
 
-    <!-- 小团体心理分析 -->
-    <view class="group-analysis-card" wx:if="{{groupAnalysis && groupAnalysis.length > 0}}">
-      <view class="section-title">👥 小团体心理状态分析</view>
-      
-      <!-- 需要关注的小团体 -->
-      <view class="concern-groups-section" wx:if="{{concernGroups.length > 0}}">
-        <view class="concern-groups-header">
-          <text class="concern-groups-title">⚠️ 需要关注的小团体 ({{concernGroups.length}}个)</text>
-        </view>
-        
-        <!-- 心理状态图表 -->
-        <view class="psychology-chart-container" wx:if="{{ecPsychology.onInit}}">
-          <ec-canvas 
-            id="psychologyChart" 
-            canvas-id="psychologyChart" 
-            ec="{{ ecPsychology }}"
-            class="ec-canvas"
-          ></ec-canvas>
-        </view>
-        
-        <!-- 小团体详情列表 -->
-        <view class="group-list">
-          <view class="group-item concern" wx:for="{{concernGroups}}" wx:key="index" wx:for-item="group">
-            <view class="group-header">
-              <text class="group-name">小团体{{group.index}}</text>
-              <view class="group-status-badge {{group.groupStatus === '正常' ? 'normal' : 'warning'}}">
-                <text>{{group.groupStatus}}</text>
-              </view>
-            </view>
-            <view class="group-members">
-              <text class="members-label">成员：</text>
-              <view class="members-list">
-                <text class="member-name" wx:for="{{group.students}}" wx:key="studentId" wx:for-item="student" data-student-id="{{student.studentId}}" bindtap="showStudentDetail">
-                  {{student.studentName}}
-                </text>
-              </view>
-            </view>
-            <view class="group-problems" wx:if="{{group.problemDimensions.length > 0}}">
-              <text class="problems-label">问题维度：</text>
-              <view class="problem-tags">
-                <view class="problem-tag" wx:for="{{group.problemDimensions}}" wx:key="dimension" wx:for-item="prob">
-                  <text>{{prob.name}} ({{prob.scoreFormatted}})</text>
-                </view>
-              </view>
-            </view>
-            <view class="group-reason">
-              <text class="reason-label">关注原因：</text>
-              <text class="reason-text">{{group.reasonText}}</text>
-            </view>
-          </view>
-        </view>
-      </view>
-      
-      <!-- 正常小团体 -->
-      <view class="normal-groups-section" wx:if="{{groupAnalysis.length > concernGroups.length}}">
-        <view class="normal-groups-header">
-          <text class="normal-groups-title">✅ 正常小团体 ({{groupAnalysis.length - concernGroups.length}}个)</text>
-        </view>
-        <view class="group-list">
-          <view class="group-item normal" wx:for="{{groupAnalysis}}" wx:key="index" wx:for-item="group" wx:if="{{!group.needsAttention}}">
-            <view class="group-header">
-              <text class="group-name">小团体{{group.index}}</text>
-              <text class="group-member-count">({{group.studentCount}}人)</text>
-            </view>
-            <view class="group-members">
-              <view class="members-list">
-                <text class="member-name" wx:for="{{group.students}}" wx:key="studentId" wx:for-item="student" data-student-id="{{student.studentId}}" bindtap="showStudentDetail">
-                  {{student.studentName}}
-                </text>
-              </view>
-            </view>
-          </view>
-        </view>
-      </view>
-    </view>
-
-    <!-- 意见领袖 -->
-    <view class="section-card" wx:if="{{analysisResult.leaders.length > 0}}">
-      <view class="section-title">🌟 意见领袖 ({{analysisResult.leaders.length}}人)</view>
-      <view class="student-list">
-        <view class="student-item leader" wx:for="{{analysisResult.leaders}}" wx:key="id">
-          <text class="student-name">{{item.name}}</text>
-          <view class="student-scores">
-            <text class="score-item">度中心性: {{item.degreeCentralityFormatted}}%</text>
-            <text class="score-item">中介中心性: {{item.betweennessCentralityFormatted}}%</text>
-          </view>
-        </view>
-      </view>
-    </view>
-
-    <!-- 孤立学生 -->
-    <view class="section-card" wx:if="{{analysisResult.isolated.length > 0}}">
-      <view class="section-title">⚠️ 需要关注 ({{analysisResult.isolated.length}}人)</view>
-      <view class="student-list">
-        <view class="student-item isolated" wx:for="{{analysisResult.isolated}}" wx:key="id">
-          <text class="student-name">{{item.name}}</text>
-          <view class="student-scores">
-            <text class="score-item">度中心性: {{item.degreeCentralityFormatted}}%</text>
-            <text class="score-item">连接数: {{item.degree}}</text>
-          </view>
-        </view>
-      </view>
-    </view>
-
-    <!-- 详细信息 -->
+    <!-- 5. 所有学生列表 (可点击查看详情) -->
     <view class="section-card">
       <view class="section-title" bindtap="toggleDetails">
-        <text>📊 所有学生详情</text>
+        <text>📊 学生综合档案</text>
         <text class="toggle-icon">{{showDetails ? '▼' : '▶'}}</text>
       </view>
-      <view class="detail-list" wx:if="{{showDetails}}">
-        <view class="detail-item" wx:for="{{analysisResult.studentList}}" wx:key="id">
-          <view class="detail-header">
-            <text class="detail-name">{{item.name}}</text>
-            <text class="detail-degree">连接数: {{item.degree}}</text>
-          </view>
-          <view class="detail-scores">
-            <text class="detail-score">度中心性: {{item.degreeCentralityFormatted}}%</text>
-            <text class="detail-score">中介中心性: {{item.betweennessCentralityFormatted}}%</text>
-          </view>
+      <view class="members-list" wx:if="{{showDetails}}">
+        <view 
+          class="member-name" 
+          wx:for="{{analysisResult.studentList}}" 
+          wx:key="id"
+          bindtap="showStudentDetail" 
+          data-student="{{item}}"
+        >
+          {{item.name}}
         </view>
       </view>
     </view>
+
   </view>
 
   <!-- 空状态 -->
@@ -243,29 +180,46 @@
     <text>暂无数据</text>
   </view>
 
-  <!-- 节点详情弹窗 -->
-  <view class="modal" wx:if="{{showNodeModal}}" bindtap="closeNodeModal">
+  <!-- 学生详情弹窗 -->
+  <view class="student-detail-modal" wx:if="{{showStudentDetail}}" bindtap="closeStudentDetail">
     <view class="modal-content" catchtap="stopPropagation">
       <view class="modal-header">
-        <text class="modal-title">学生信息</text>
-        <text class="modal-close" bindtap="closeNodeModal">×</text>
+        <text class="modal-title">{{selectedStudent.name}} - 详细报告</text>
+        <text class="modal-close" bindtap="closeStudentDetail">×</text>
       </view>
-      <view class="modal-body" wx:if="{{selectedNodeInfo}}">
-        <view class="node-info-item">
-          <text class="info-label">姓名：</text>
-          <text class="info-value">{{selectedNodeInfo.name}}</text>
+      <view class="modal-body">
+        <!-- 社交角色分析 (新增) -->
+        <view class="social-analysis-section" wx:if="{{selectedStudent.socialStats && selectedStudent.socialStats.length > 0}}">
+          <view class="section-subtitle">社交角色分析</view>
+          <view class="social-stats-grid">
+            <view class="social-stat-item" wx:for="{{selectedStudent.socialStats}}" wx:key="label">
+              <text class="social-stat-value">{{item.value}}</text>
+              <text class="social-stat-label">{{item.label}}</text>
+              <text class="social-stat-desc">({{item.desc}})</text>
+            </view>
+          </view>
         </view>
-        <view class="node-info-item">
-          <text class="info-label">连接数：</text>
-          <text class="info-value">{{selectedNodeInfo.degree}}</text>
+
+        <!-- 心理维度得分 -->
+        <view class="student-dimensions">
+          <view class="section-subtitle">心理维度评估</view>
+          <view class="dimension-detail-item" wx:for="{{selectedStudent.dimensionScores}}" wx:key="key">
+            <view class="dimension-detail-header">
+              <text class="dimension-detail-name">{{item.name}}</text>
+              <view class="dimension-detail-status-badge {{item.status === '正常' ? 'normal' : item.status === '关注' ? 'warning' : 'danger'}}">
+                {{item.status}}
+              </view>
+            </view>
+            <view class="dimension-detail-scores">
+              <text class="detail-score-label">得分:</text>
+              <text class="detail-score-value">{{item.scoreFormatted}}</text>
+              <text class="detail-threshold-label">参考值:</text>
+              <text class="detail-threshold-value">{{item.thresholdFormatted}}</text>
+            </view>
+          </view>
         </view>
-        <view class="node-info-item">
-          <text class="info-label">度中心性：</text>
-          <text class="info-value">{{selectedNodeInfo.degreeCentrality}}%</text>
-        </view>
-        <view class="node-info-item">
-          <text class="info-label">中介中心性：</text>
-          <text class="info-value">{{selectedNodeInfo.betweennessCentrality}}%</text>
+        <view wx:if="{{!selectedStudent.dimensionScores || selectedStudent.dimensionScores.length === 0}}" class="empty">
+          暂无详细测评数据
         </view>
       </view>
     </view>
@@ -275,84 +229,32 @@
   <view class="modal" wx:if="{{showHelpModal}}" bindtap="closeHelpModal">
     <view class="modal-content help-modal" catchtap="stopPropagation">
       <view class="modal-header">
-        <text class="modal-title">关系图说明</text>
+        <text class="modal-title">帮助指南</text>
         <text class="modal-close" bindtap="closeHelpModal">×</text>
       </view>
       <view class="modal-body">
         <view class="help-section">
-          <text class="help-section-title">📊 关系图含义</text>
-          <text class="help-content">关系图展示了班级学生之间的社交网络结构。每个圆圈代表一个学生，圆圈之间的连线表示他们之间的朋友关系。</text>
+          <text class="help-section-title">📊 关系图说明</text>
+          <text class="help-content">关系图展示了班级学生之间的社交网络。圆圈代表学生，连线代表朋友关系。</text>
         </view>
         
         <view class="help-section">
-          <text class="help-section-title">🎨 节点颜色</text>
+          <text class="help-section-title">🎨 颜色含义</text>
           <view class="help-item">
-            <view class="help-color-dot" style="background-color: #52c41a;"></view>
-            <text class="help-text">绿色：意见领袖（在班级中影响力较大）</text>
+            <view class="help-color-dot" style="background-color: #ef4444;"></view>
+            <text class="help-text">红色：核心人物 (影响力大)</text>
           </view>
           <view class="help-item">
-            <view class="help-color-dot" style="background-color: #1890ff;"></view>
+            <view class="help-color-dot" style="background-color: #3b82f6;"></view>
             <text class="help-text">蓝色：普通学生</text>
           </view>
           <view class="help-item">
-            <view class="help-color-dot" style="background-color: #faad14;"></view>
-            <text class="help-text">橙色：需要关注（社交关系较少）</text>
-          </view>
-        </view>
-
-        <view class="help-section">
-          <text class="help-section-title">📏 节点大小</text>
-          <text class="help-content">节点的大小表示该学生的连接数，连接数越多，节点越大。</text>
-        </view>
-
-        <view class="help-section">
-          <text class="help-section-title">🔗 连接数</text>
-          <text class="help-content">连接数是指一个学生在社交网络中的朋友数量，即与该学生直接相连的其他学生数量。连接数越多，说明该学生的社交关系越丰富。</text>
-        </view>
-
-        <view class="help-section">
-          <text class="help-section-title">📈 度中心性</text>
-          <text class="help-content">度中心性衡量一个学生在社交网络中的直接连接程度。计算公式为：连接数 / (总学生数 - 1)。度中心性越高，说明该学生在班级中的直接影响力越大。</text>
-        </view>
-
-        <view class="help-section">
-          <text class="help-section-title">🌉 中介中心性</text>
-          <text class="help-content">中介中心性衡量一个学生作为"桥梁"的重要性，即有多少对同学之间的最短路径经过该学生。中介中心性高的学生往往是信息传递的关键节点。</text>
-        </view>
-
-        <view class="help-section">
-          <text class="help-section-title">💡 操作提示</text>
-          <text class="help-content">• 拖动节点可以移动位置\n• 双指捏合或滚轮可以缩放视图\n• 点击节点可以查看详细信息\n• 点击"重置视图"可以恢复初始布局</text>
-        </view>
-      </view>
-    </view>
-  </view>
-</view>
-
-<!-- 学生详情弹窗 -->
-<view class="student-detail-modal" wx:if="{{showStudentDetail}}" bindtap="closeStudentDetail">
-  <view class="modal-content" catchtap="stopPropagation">
-    <view class="modal-header">
-      <text class="modal-title">{{selectedStudent.studentName}} - 心理测评详情</text>
-      <text class="modal-close" bindtap="closeStudentDetail">×</text>
-    </view>
-    <view class="modal-body">
-      <view class="student-dimensions">
-        <view class="dimension-detail-item" wx:for="{{selectedStudent.dimensionScores}}" wx:key="key">
-          <view class="dimension-detail-header">
-            <text class="dimension-detail-name">{{item.name}}</text>
-            <view class="dimension-detail-status-badge {{item.status === '正常' ? 'normal' : item.status === '关注' ? 'warning' : 'danger'}}">
-              <text>{{item.status === '正常' ? '正常' : '偏高'}}</text>
-            </view>
-          </view>
-          <view class="dimension-detail-scores">
-            <text class="detail-score-label">得分:</text>
-            <text class="detail-score-value">{{item.scoreFormatted}}</text>
-            <text class="detail-threshold-label">合理区间:</text>
-            <text class="detail-threshold-value">0 - {{item.thresholdFormatted}}</text>
+            <view class="help-color-dot" style="background-color: #9ca3af;"></view>
+            <text class="help-text">灰色：需关注 (互动较少)</text>
           </view>
         </view>
       </view>
     </view>
   </view>
+
 </view>

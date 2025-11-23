@@ -1,33 +1,38 @@
 /* module1/index.wxss - 班级生态评估模块样式 */
 .container {
   min-height: 100vh;
-  background-color: #f5f5f5;
-  padding: 30rpx;
+  background-color: #f0f2f5; /* 更现代的背景灰 */
+  padding: 24rpx;
+  padding-bottom: 40rpx;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30rpx;
+  margin-bottom: 32rpx;
+  padding: 0 8rpx;
 }
 
 .title {
-  font-size: 48rpx;
-  font-weight: bold;
-  color: #333;
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #1f2937;
 }
 
 .refresh-btn {
-  background-color: #1890ff;
-  color: #fff;
-  border-radius: 8rpx;
+  background-color: #3b82f6 !important; /* 蓝色按钮 */
+  color: #fff !important;
+  border-radius: 30rpx !important;
+  font-size: 24rpx !important;
+  padding: 10rpx 24rpx !important;
+  box-shadow: 0 4rpx 12rpx rgba(59, 130, 246, 0.3);
 }
 
 .loading {
   text-align: center;
   padding: 100rpx 0;
-  color: #999;
+  color: #6b7280;
   font-size: 28rpx;
 }
 
@@ -37,795 +42,456 @@
   gap: 24rpx;
 }
 
-.stats-card {
+/* 通用卡片样式 */
+.stats-card, .graph-card, .psychology-card, .risk-card, .section-card {
   background-color: #fff;
-  border-radius: 16rpx;
-  padding: 30rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+  border-radius: 24rpx;
+  padding: 32rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+  margin-bottom: 0; /* Flex gap handling margin */
 }
 
-.stats-title {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #333;
+/* 卡片头部 */
+.card-header, .graph-header, .section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 24rpx;
 }
 
+.card-title-wrapper, .graph-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.card-icon {
+  font-size: 36rpx;
+}
+
+.stats-title, .graph-title, .section-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #374151;
+  margin: 0; /* Reset */
+}
+
+/* 统计网格 */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20rpx;
+  gap: 24rpx;
 }
 
 .stat-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20rpx;
-  background-color: #f8f9fa;
-  border-radius: 12rpx;
+  justify-content: center;
+  padding: 24rpx 16rpx;
+  background-color: #f9fafb;
+  border-radius: 16rpx;
+  border: 1px solid #f3f4f6;
 }
 
 .stat-value {
-  font-size: 36rpx;
-  font-weight: bold;
-  color: #1890ff;
+  font-size: 40rpx;
+  font-weight: 800;
+  color: #3b82f6;
+  line-height: 1.2;
   margin-bottom: 8rpx;
 }
 
 .stat-label {
   font-size: 24rpx;
-  color: #666;
+  color: #6b7280;
 }
 
-.section-card {
-  background-color: #fff;
-  border-radius: 16rpx;
-  padding: 30rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+/* 风险预警卡片 */
+.risk-card {
+  border-left: 8rpx solid #f59e0b; /* 橙色警示条 */
 }
 
-.section-title {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 20rpx;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.warning-header .stats-title {
+  color: #b45309;
 }
 
-.toggle-icon {
-  font-size: 24rpx;
-  color: #999;
+.risk-section {
+  margin-bottom: 24rpx;
+  padding-bottom: 24rpx;
+  border-bottom: 1px dashed #e5e7eb;
 }
 
-.student-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16rpx;
-}
-
-.student-item {
-  padding: 20rpx;
-  border-radius: 12rpx;
-  border-left: 4rpx solid #1890ff;
-}
-
-.student-item.leader {
-  background-color: #e6f7ff;
-  border-left-color: #1890ff;
-}
-
-.student-item.isolated {
-  background-color: #fff7e6;
-  border-left-color: #faad14;
-}
-
-.student-name {
-  font-size: 30rpx;
-  font-weight: 600;
-  color: #333;
-  display: block;
-  margin-bottom: 12rpx;
-}
-
-.student-scores {
-  display: flex;
-  flex-direction: column;
-  gap: 8rpx;
-}
-
-.score-item {
-  font-size: 24rpx;
-  color: #666;
-}
-
-.detail-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16rpx;
-  margin-top: 20rpx;
-}
-
-.detail-item {
-  padding: 20rpx;
-  background-color: #f8f9fa;
-  border-radius: 12rpx;
-}
-
-.detail-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12rpx;
-}
-
-.detail-name {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #333;
-}
-
-.detail-degree {
-  font-size: 24rpx;
-  color: #666;
-}
-
-.detail-scores {
-  display: flex;
-  gap: 20rpx;
-}
-
-.detail-score {
-  font-size: 24rpx;
-  color: #666;
-}
-
-.empty {
-  text-align: center;
-  padding: 100rpx 0;
-  color: #999;
-  font-size: 28rpx;
-}
-
-/* 关系图样式 */
-.graph-card {
-  background-color: #fff;
-  border-radius: 16rpx;
-  padding: 30rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
-}
-
-.graph-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20rpx;
-}
-
-.graph-title-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-}
-
-.graph-title {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #333;
-}
-
-.help-icon {
-  width: 40rpx;
-  height: 40rpx;
-  border-radius: 50%;
-  background-color: #f0f0f0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24rpx;
-  color: #666;
-  cursor: pointer;
-}
-
-.help-icon:active {
-  background-color: #e0e0e0;
-}
-
-.reset-btn {
-  background-color: #f0f0f0;
-  color: #333;
-  border-radius: 8rpx;
-  font-size: 24rpx;
-}
-
-.graph-container {
-  width: 100%;
-  height: 600rpx;
-  background-color: #fafafa;
-  border-radius: 12rpx;
-  overflow: hidden;
-  position: relative;
-  margin-bottom: 20rpx;
-}
-
-.ec-canvas {
-  width: 100%;
-  height: 100%;
-}
-
-.graph-tips {
-  text-align: center;
-  padding: 12rpx;
-  background-color: #f8f9fa;
-  border-radius: 8rpx;
-}
-
-.graph-tips text {
-  font-size: 24rpx;
-  color: #999;
-}
-
-/* 弹窗样式 */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  width: 85%;
-  max-height: 80vh;
-  background-color: #fff;
-  border-radius: 16rpx;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.help-modal {
-  max-height: 85vh;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 30rpx;
-  border-bottom: 2rpx solid #f0f0f0;
-}
-
-.modal-title {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #333;
-}
-
-.modal-close {
-  font-size: 48rpx;
-  color: #999;
-  line-height: 1;
-  width: 48rpx;
-  height: 48rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 30rpx;
-}
-
-/* 节点信息样式 */
-.node-info-item {
-  display: flex;
-  padding: 20rpx 0;
-  border-bottom: 1rpx solid #f0f0f0;
-}
-
-.node-info-item:last-child {
+.risk-section:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
   border-bottom: none;
 }
 
-.info-label {
+.risk-title {
   font-size: 28rpx;
-  color: #666;
-  width: 180rpx;
-  flex-shrink: 0;
-}
-
-.info-value {
-  font-size: 28rpx;
-  color: #333;
   font-weight: 600;
-  flex: 1;
+  color: #4b5563;
+  margin-bottom: 8rpx;
 }
 
-/* 帮助说明样式 */
-.help-section {
-  margin-bottom: 30rpx;
-}
-
-.help-section:last-child {
-  margin-bottom: 0;
-}
-
-.help-section-title {
-  font-size: 30rpx;
-  font-weight: 600;
-  color: #333;
-  display: block;
+.risk-desc {
+  font-size: 24rpx;
+  color: #9ca3af;
   margin-bottom: 16rpx;
 }
 
-.help-content {
-  font-size: 26rpx;
-  color: #666;
-  line-height: 1.8;
-  display: block;
-  white-space: pre-line;
-}
-
-.help-item {
-  display: flex;
-  align-items: flex-start;
-  margin-bottom: 12rpx;
-  gap: 12rpx;
-}
-
-.help-color-dot {
-  width: 32rpx;
-  height: 32rpx;
-  border-radius: 50%;
-  border: 2rpx solid #fff;
-  box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
-  flex-shrink: 0;
-  margin-top: 4rpx;
-}
-
-.help-text {
-  font-size: 26rpx;
-  color: #666;
-  line-height: 1.6;
-  flex: 1;
-}
-
-/* 心理评估样式 */
-.psychology-card {
-  background-color: #fff;
-  border-radius: 16rpx;
-  padding: 30rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
-  margin-bottom: 24rpx;
-}
-
-.psychology-overview {
-  display: flex;
-  align-items: center;
-  gap: 24rpx;
-  margin-bottom: 20rpx;
-}
-
-.atmosphere-badge {
-  padding: 20rpx 32rpx;
-  border-radius: 12rpx;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 160rpx;
-}
-
-.atmosphere-badge.normal {
-  background-color: #e6f7ff;
-  border: 2rpx solid #1890ff;
-}
-
-.atmosphere-badge.positive {
-  background-color: #f6ffed;
-  border: 2rpx solid #52c41a;
-}
-
-.atmosphere-badge.concern {
-  background-color: #fff7e6;
-  border: 2rpx solid #faad14;
-}
-
-.atmosphere-label {
-  font-size: 24rpx;
-  color: #666;
-  margin-bottom: 8rpx;
-}
-
-.atmosphere-value {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #333;
-}
-
-.psychology-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 12rpx;
-  flex: 1;
-}
-
-.psychology-stat-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.psychology-stat-item .stat-label {
-  font-size: 26rpx;
-  color: #666;
-}
-
-.psychology-stat-item .stat-value {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #1890ff;
-}
-
-.concern-dimensions {
-  padding-top: 20rpx;
-  border-top: 1rpx solid #f0f0f0;
-}
-
-.concern-title {
-  font-size: 26rpx;
-  color: #666;
-  display: block;
-  margin-bottom: 12rpx;
-}
-
-.dimension-tags {
+.student-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 12rpx;
+  gap: 16rpx;
 }
 
-.dimension-tag {
-  padding: 8rpx 16rpx;
-  background-color: #fff7e6;
-  border: 1rpx solid #faad14;
-  border-radius: 8rpx;
-  font-size: 24rpx;
-  color: #fa8c16;
+.student-tag {
+  padding: 8rpx 20rpx;
+  background-color: #e5e7eb;
+  border-radius: 30rpx;
+  font-size: 26rpx;
+  color: #374151;
 }
 
-/* 小团体分析样式 */
-.group-analysis-card {
-  background-color: #fff;
-  border-radius: 16rpx;
-  padding: 30rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
-  margin-bottom: 24rpx;
+.student-tag.warning {
+  background-color: #fef3c7;
+  color: #d97706;
+  border: 1px solid #fcd34d;
 }
 
-.concern-groups-section {
-  margin-bottom: 30rpx;
-}
-
-.concern-groups-header {
-  margin-bottom: 20rpx;
-}
-
-.concern-groups-title {
-  font-size: 30rpx;
-  font-weight: 600;
-  color: #fa8c16;
-}
-
-.psychology-chart-container {
-  width: 100%;
-  height: 400rpx;
-  background-color: #fafafa;
-  border-radius: 12rpx;
-  margin-bottom: 24rpx;
-  overflow: hidden;
-}
-
+/* 小团体列表 */
 .group-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20rpx;
-}
-
-.group-item {
-  padding: 24rpx;
-  border-radius: 12rpx;
-  border-left: 4rpx solid #1890ff;
-}
-
-.group-item.concern {
-  background-color: #fff7e6;
-  border-left-color: #faad14;
-}
-
-.group-item.normal {
-  background-color: #f6ffed;
-  border-left-color: #52c41a;
-}
-
-.group-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12rpx;
-}
-
-.group-name {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #333;
-}
-
-.group-member-count {
-  font-size: 24rpx;
-  color: #999;
-}
-
-.group-status-badge {
-  padding: 6rpx 16rpx;
-  border-radius: 8rpx;
-  font-size: 24rpx;
-}
-
-.group-status-badge.normal {
-  background-color: #e6f7ff;
-  color: #1890ff;
-}
-
-.group-status-badge.warning {
-  background-color: #fff7e6;
-  color: #fa8c16;
-}
-
-.group-members {
-  margin-bottom: 12rpx;
-}
-
-.members-label {
-  font-size: 26rpx;
-  color: #666;
-  margin-right: 8rpx;
-}
-
-.members-names {
-  font-size: 26rpx;
-  color: #333;
-}
-
-.group-problems {
-  margin-bottom: 12rpx;
-}
-
-.problems-label {
-  font-size: 26rpx;
-  color: #666;
-  display: block;
-  margin-bottom: 8rpx;
-}
-
-.problem-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8rpx;
-}
-
-.problem-tag {
-  padding: 6rpx 12rpx;
-  background-color: #fff1f0;
-  border: 1rpx solid #ffccc7;
-  border-radius: 6rpx;
-  font-size: 24rpx;
-  color: #ff4d4f;
-}
-
-.group-reason {
-  padding-top: 12rpx;
-  border-top: 1rpx solid #f0f0f0;
-}
-
-.reason-label {
-  font-size: 26rpx;
-  color: #666;
-  font-weight: 600;
-  margin-right: 8rpx;
-}
-
-.reason-text {
-  font-size: 26rpx;
-  color: #333;
-  line-height: 1.6;
-}
-
-.normal-groups-section {
-  margin-top: 30rpx;
-  padding-top: 30rpx;
-  border-top: 2rpx solid #f0f0f0;
-}
-
-.normal-groups-header {
-  margin-bottom: 20rpx;
-}
-
-.normal-groups-title {
-  font-size: 30rpx;
-  font-weight: 600;
-  color: #52c41a;
-}
-
-/* 维度详细数据样式 */
-.dimensions-detail-section {
-  margin-top: 30rpx;
-  padding-top: 30rpx;
-  border-top: 2rpx solid #f0f0f0;
-}
-
-.dimensions-chart-container {
-  width: 100%;
-  height: 500rpx;
-  background-color: #fafafa;
-  border-radius: 12rpx;
-  margin-bottom: 24rpx;
-  overflow: hidden;
-}
-
-.dimensions-list {
   display: flex;
   flex-direction: column;
   gap: 16rpx;
 }
 
-.dimension-item {
-  padding: 20rpx;
-  background-color: #fafafa;
+.group-item {
+  background-color: #f9fafb;
+  padding: 16rpx 24rpx;
   border-radius: 12rpx;
-  border-left: 4rpx solid #1890ff;
+  border: 1px solid #f3f4f6;
+}
+
+.group-item.warning {
+  background-color: #fffbeb;
+  border-color: #fcd34d;
+}
+
+.group-name {
+  display: block;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #b45309;
+  margin-bottom: 4rpx;
+}
+
+.group-members {
+  font-size: 24rpx;
+  color: #6b7280;
+}
+
+/* 图表卡片 */
+.graph-container {
+  height: 500rpx; /* 增加高度 */
+  background-color: #fafafa;
+  border-radius: 16rpx;
+  overflow: hidden;
+  border: 1px solid #f3f4f6;
+}
+
+.graph-legend {
+  display: flex;
+  justify-content: center;
+  gap: 32rpx;
+  margin-top: 20rpx;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  font-size: 24rpx;
+  color: #6b7280;
+}
+
+.dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  margin-right: 8rpx;
+}
+
+.dot.leader { background-color: #ef4444; } /* 红色代表核心 */
+.dot.normal { background-color: #3b82f6; } /* 蓝色代表普通 */
+.dot.isolated { background-color: #9ca3af; } /* 灰色代表孤立 */
+
+/* 心理晴雨表 */
+.psychology-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+  margin-bottom: 32rpx;
+}
+
+.atmosphere-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f0f9ff;
+  padding: 20rpx;
+  border-radius: 16rpx;
+  border: 1px solid #bae6fd;
+}
+
+.atmosphere-label {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #0369a1;
+}
+
+.atmosphere-badge {
+  padding: 6rpx 24rpx;
+  border-radius: 30rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.atmosphere-badge.normal {
+  background-color: #d1fae5;
+  color: #059669;
+}
+
+.atmosphere-badge.positive {
+  background-color: #fff7ed;
+  color: #ea580c;
+}
+
+.atmosphere-badge.concern {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.suggestion-box {
+  background-color: #fffbeb;
+  padding: 20rpx;
+  border-radius: 12rpx;
+  border-left: 6rpx solid #f59e0b;
+}
+
+.suggestion-title {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #b45309;
+  margin-bottom: 8rpx;
+}
+
+.suggestion-content {
+  font-size: 24rpx;
+  color: #92400e;
+  line-height: 1.5;
+}
+
+.highlight {
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+/* 维度列表 */
+.dimensions-list {
+  margin-top: 24rpx;
+}
+
+.list-header {
+  display: flex;
+  padding: 16rpx 0;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 24rpx;
+  color: #9ca3af;
+}
+
+.list-header text {
+  flex: 1;
+  text-align: center;
+}
+
+.list-header text:first-child {
+  text-align: left;
+  flex: 1.5;
+}
+
+.dimension-item {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.dimension-item:last-child {
+  border-bottom: none;
 }
 
 .dimension-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12rpx;
+  flex: 1.5;
 }
 
 .dimension-name {
   font-size: 28rpx;
-  font-weight: 600;
-  color: #333;
+  color: #374151;
+  font-weight: 500;
 }
 
-.dimension-status-badge {
-  padding: 6rpx 16rpx;
-  border-radius: 8rpx;
+.dimension-value {
+  flex: 1;
+  text-align: center;
+}
+
+.score {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #10b981; /* 默认绿色 */
+}
+
+.score.concern {
+  color: #ef4444;
+}
+
+.dimension-range {
+  flex: 1;
+  text-align: center;
+}
+
+.range-text {
   font-size: 24rpx;
-}
-
-.dimension-status-badge.normal {
-  background-color: #f6ffed;
-  color: #52c41a;
-  border: 1rpx solid #b7eb8f;
-}
-
-.dimension-status-badge.warning {
-  background-color: #fff7e6;
-  color: #faad14;
-  border: 1rpx solid #ffe58f;
-}
-
-.dimension-status-badge.danger {
-  background-color: #fff1f0;
-  color: #ff4d4f;
-  border: 1rpx solid #ffccc7;
-}
-
-.dimension-scores {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-  font-size: 26rpx;
-}
-
-.score-label, .threshold-label {
-  color: #666;
-}
-
-.score-value {
-  color: #1890ff;
-  font-weight: 600;
-  margin-right: 16rpx;
-}
-
-.threshold-value {
-  color: #999;
-}
-
-/* 成员列表样式 */
-.members-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12rpx;
-  margin-top: 8rpx;
-}
-
-.member-name {
-  padding: 8rpx 16rpx;
-  background-color: #e6f7ff;
-  border: 1rpx solid #91d5ff;
+  color: #9ca3af;
+  background-color: #f3f4f6;
+  padding: 4rpx 12rpx;
   border-radius: 8rpx;
-  font-size: 26rpx;
-  color: #1890ff;
-  cursor: pointer;
 }
 
-.member-name:active {
-  background-color: #bae7ff;
-}
-
-/* 学生详情弹窗样式 */
-.student-detail-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+/* 帮助图标 */
+.help-icon {
+  background: #f3f4f6;
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 24rpx;
+  color: #6b7280;
+}
+
+.reset-btn {
+  margin: 0 !important;
+  font-size: 22rpx !important;
+  background: #fff !important;
+  color: #6b7280 !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+/* 弹窗通用 */
+.modal, .student-detail-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
   z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .modal-content {
-  width: 90%;
-  max-height: 80%;
+  width: 85%;
   background-color: #fff;
   border-radius: 16rpx;
   overflow: hidden;
+  max-height: 80vh;
   display: flex;
   flex-direction: column;
 }
 
 .modal-header {
+  padding: 30rpx;
+  border-bottom: 1px solid #eee;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 30rpx;
-  border-bottom: 1rpx solid #f0f0f0;
 }
 
 .modal-title {
-  font-size: 32rpx;
+  font-size: 34rpx;
   font-weight: 600;
   color: #333;
 }
 
 .modal-close {
-  font-size: 48rpx;
+  font-size: 40rpx;
   color: #999;
   line-height: 1;
-  padding: 0 10rpx;
+  padding: 0 16rpx;
 }
 
 .modal-body {
-  flex: 1;
-  overflow-y: auto;
   padding: 30rpx;
+  overflow-y: auto;
 }
 
+/* 社交分析样式 */
+.social-analysis-section {
+  margin-bottom: 30rpx;
+  padding-bottom: 30rpx;
+  border-bottom: 1px dashed #eee;
+}
+
+.section-subtitle {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20rpx;
+  padding-left: 16rpx;
+  border-left: 6rpx solid #3b82f6;
+}
+
+.social-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+}
+
+.social-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx 10rpx;
+  background-color: #f0f9ff;
+  border-radius: 12rpx;
+  text-align: center;
+}
+
+.social-stat-value {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #0284c7;
+  margin-bottom: 6rpx;
+}
+
+.social-stat-label {
+  font-size: 24rpx;
+  color: #475569;
+  margin-bottom: 4rpx;
+}
+
+.social-stat-desc {
+  font-size: 20rpx;
+  color: #94a3b8;
+}
+
+/* 弹窗内部样式 */
 .student-dimensions {
   display: flex;
   flex-direction: column;
@@ -895,4 +561,63 @@
 
 .detail-threshold-value {
   color: #999;
+}
+
+/* 帮助弹窗内容 */
+.help-section {
+  margin-bottom: 30rpx;
+}
+
+.help-section:last-child {
+  margin-bottom: 0;
+}
+
+.help-section-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+.help-content {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.6;
+}
+
+.help-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12rpx;
+  gap: 12rpx;
+}
+
+.help-color-dot {
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.help-text {
+  font-size: 26rpx;
+  color: #666;
+}
+
+/* 学生列表样式 */
+.members-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-top: 16rpx;
+}
+
+.member-name {
+  padding: 12rpx 24rpx;
+  background-color: #e6f7ff;
+  color: #1890ff;
+  border-radius: 30rpx;
+  font-size: 26rpx;
+  border: 1px solid #bae7ff;
 }
