@@ -67,77 +67,107 @@ export const mockStudentsForSeating = [
   {
     id: 's001', name: '张小明', gender: 'male',
     scores: { math: 95, chinese: 88, english: 92, science: 90 },
-    personality: { type: '外向', traits: ['活泼', '开朗', '积极'] }
+    personality: { type: '外向', traits: ['活泼', '开朗', '积极'] },
+    roles: ['班长'],
+    socialScore: 92
   },
   {
     id: 's002', name: '李小红', gender: 'female',
     scores: { math: 75, chinese: 92, english: 88, science: 80 },
-    personality: { type: '内向', traits: ['安静', '细心', '专注'] }
+    personality: { type: '内向', traits: ['安静', '细心', '专注'] },
+    roles: ['学习委员'],
+    socialScore: 65
   },
   {
     id: 's003', name: '王小强', gender: 'male',
     scores: { math: 88, chinese: 75, english: 85, science: 90 },
-    personality: { type: '外向', traits: ['活跃', '好动', '热情'] }
+    personality: { type: '外向', traits: ['活跃', '好动', '热情'] },
+    roles: ['体育委员'],
+    socialScore: 88
   },
   {
     id: 's004', name: '赵小美', gender: 'female',
     scores: { math: 82, chinese: 95, english: 90, science: 85 },
-    personality: { type: '中性', traits: ['温和', '友善', '合作'] }
+    personality: { type: '中性', traits: ['温和', '友善', '合作'] },
+    roles: ['文艺委员'],
+    socialScore: 75
   },
   {
     id: 's005', name: '孙小亮', gender: 'male',
-    scores: { math: 70, chinese: 78, english: 72, science: 75 },
-    personality: { type: '内向', traits: ['安静', '谨慎', '认真'] }
+    scores: { math: 55, chinese: 60, english: 50, science: 70 },
+    personality: { type: '内向', traits: ['安静', '谨慎', '认真'] },
+    roles: [],
+    socialScore: 40
   },
   {
     id: 's006', name: '周小静', gender: 'female',
     scores: { math: 92, chinese: 85, english: 88, science: 90 },
-    personality: { type: '中性', traits: ['稳重', '负责', '可靠'] }
+    personality: { type: '中性', traits: ['稳重', '负责', '可靠'] },
+    roles: ['英语课代表'],
+    socialScore: 70
   },
   {
     id: 's007', name: '吴小刚', gender: 'male',
     scores: { math: 85, chinese: 80, english: 75, science: 88 },
-    personality: { type: '外向', traits: ['活跃', '自信', '领导'] }
+    personality: { type: '外向', traits: ['活跃', '自信', '领导'] },
+    roles: ['劳动委员'],
+    socialScore: 85
   },
   {
     id: 's008', name: '郑小芳', gender: 'female',
     scores: { math: 78, chinese: 90, english: 85, science: 82 },
-    personality: { type: '内向', traits: ['文静', '细心', '耐心'] }
+    personality: { type: '内向', traits: ['文静', '细心', '耐心'] },
+    roles: [],
+    socialScore: 55
   },
   {
     id: 's009', name: '钱小华', gender: 'male',
     scores: { math: 90, chinese: 88, english: 92, science: 95 },
-    personality: { type: '中性', traits: ['平衡', '友善', '合作'] }
+    personality: { type: '中性', traits: ['平衡', '友善', '合作'] },
+    roles: ['心理委员'],
+    socialScore: 60
   },
   {
     id: 's010', name: '陈小丽', gender: 'female',
-    scores: { math: 65, chinese: 70, english: 68, science: 72 },
-    personality: { type: '内向', traits: ['安静', '害羞', '谨慎'] }
+    scores: { math: 55, chinese: 70, english: 58, science: 62 },
+    personality: { type: '内向', traits: ['安静', '害羞', '谨慎'] },
+    roles: [],
+    socialScore: 30
   },
   {
     id: 's011', name: '林小军', gender: 'male',
-    scores: { math: 88, chinese: 82, english: 85, science: 90 },
-    personality: { type: '外向', traits: ['活跃', '积极', '乐观'] }
+    scores: { math: 88, chinese: 82, english: 40, science: 90 },
+    personality: { type: '外向', traits: ['活跃', '积极', '乐观'] },
+    roles: [],
+    socialScore: 80
   },
   {
     id: 's012', name: '黄小燕', gender: 'female',
     scores: { math: 80, chinese: 88, english: 90, science: 85 },
-    personality: { type: '中性', traits: ['温和', '友善', '细心'] }
+    personality: { type: '中性', traits: ['温和', '友善', '细心'] },
+    roles: ['数学课代表'],
+    socialScore: 68
   },
   {
     id: 's013', name: '刘小波', gender: 'male',
     scores: { math: 72, chinese: 75, english: 70, science: 78 },
-    personality: { type: '内向', traits: ['安静', '认真', '专注'] }
+    personality: { type: '内向', traits: ['安静', '认真', '专注'] },
+    roles: [],
+    socialScore: 45
   },
   {
     id: 's014', name: '徐小婷', gender: 'female',
     scores: { math: 85, chinese: 90, english: 88, science: 87 },
-    personality: { type: '中性', traits: ['独立', '自主', '冷静'] }
+    personality: { type: '中性', traits: ['独立', '自主', '冷静'] },
+    roles: ['语文课代表'],
+    socialScore: 72
   },
   {
     id: 's015', name: '马小飞', gender: 'male',
     scores: { math: 95, chinese: 88, english: 90, science: 92 },
-    personality: { type: '外向', traits: ['活跃', '自信', '创新'] }
+    personality: { type: '外向', traits: ['活跃', '自信', '创新'] },
+    roles: ['宣传委员'],
+    socialScore: 90
   }
 ];
 

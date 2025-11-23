@@ -44,7 +44,9 @@ Page({
     interferenceValue: '1.0',
     // 导出相关
     canvasWidth: 375,
-    canvasHeight: 600
+    canvasHeight: 600,
+    // 选中学生的标签信息
+    selectedStudentTags: [] 
   },
 
   /**
@@ -67,10 +69,11 @@ Page({
       ]);
       
       if (studentsRes.code === 200 && studentsRes.data) {
-      this.setData({
-        students: studentsRes.data,
-        interactionHistory: interactionsRes.code === 200 ? interactionsRes.data : []
-      });
+        console.log('加载到的学生数据:', studentsRes.data); // 调试日志
+        this.setData({
+          students: studentsRes.data,
+          interactionHistory: interactionsRes.code === 200 ? interactionsRes.data : []
+        });
       
       // 自动生成座位表（默认模式）
       this.generateSeats();
@@ -629,6 +632,10 @@ Page({
         dragStartSeat: null, // 标记是从待排列区域
         selectedSeat: null // 清除座位选中状态
       });
+      
+      // 生成并显示标签
+      this.generateStudentTags(student);
+      
       wx.showToast({
         title: `已选中${student.name}，请点击目标座位`,
         icon: 'none',
@@ -636,6 +643,58 @@ Page({
       });
       console.log('选中学生:', student.name);
     }
+  },
+
+  /**
+   * 生成学生标签
+   */
+  generateStudentTags(student) {
+    if (!student) return;
+    
+    console.log('生成标签 - 输入学生:', student);
+    
+    // 确保获取完整的学生信息（包括mock中的扩展字段）
+    const fullStudent = this.data.students.find(s => s.id === student.id) || student;
+    console.log('生成标签 - 完整信息:', fullStudent);
+    
+    const tags = [];
+    
+    // 1. 班级职位 (绿色)
+    if (fullStudent.roles && fullStudent.roles.length > 0) {
+      fullStudent.roles.forEach(role => {
+        tags.push({ text: role, type: 'green' });
+      });
+    }
+    
+    // 2. 社交关系 (黄色)
+    // 社交活跃度 > 80 活跃，< 50 不活跃
+    if (fullStudent.socialScore !== undefined) {
+      if (fullStudent.socialScore > 80) {
+        tags.push({ text: '社交活跃', type: 'yellow' });
+      } else if (fullStudent.socialScore < 50) {
+        tags.push({ text: '社交不活跃', type: 'yellow' });
+      }
+    }
+    
+    // 3. 成绩相关 (优秀: 绿色, 较差: 红色)
+    // 假设 > 90 为优秀，< 60 为较差
+    if (fullStudent.scores) {
+      const subjects = { 'math': '数学', 'chinese': '语文', 'english': '英语', 'science': '科学' };
+      Object.keys(fullStudent.scores).forEach(subject => {
+        const score = fullStudent.scores[subject];
+        if (score > 90) {
+          tags.push({ text: `${subjects[subject]}优`, type: 'green' });
+        } else if (score < 60) {
+          tags.push({ text: `${subjects[subject]}差`, type: 'red' });
+        }
+      });
+    }
+    
+    console.log('生成标签 - 结果:', tags);
+    
+    this.setData({
+      selectedStudentTags: tags
+    });
   },
 
   /**
@@ -657,7 +716,8 @@ Page({
         isDragging: false,
         draggingStudent: null,
         dragStartSeat: null,
-        selectedSeat: null
+        selectedSeat: null,
+        selectedStudentTags: [] // 清除标签
       });
       return;
     }
@@ -690,6 +750,10 @@ Page({
         isDragging: true,
         selectedSeat: { row: targetRow, col: targetCol }
       });
+      
+      // 生成并显示标签
+      this.generateStudentTags(seatWithGender);
+      
       wx.showToast({
         title: `已选中${seatWithGender.name}，请点击目标座位`,
         icon: 'none',
@@ -702,7 +766,8 @@ Page({
         selectedSeat: null,
         draggingStudent: null,
         isDragging: false,
-        dragStartSeat: null
+        dragStartSeat: null,
+        selectedStudentTags: [] // 清除标签
       });
     }
   },
@@ -789,7 +854,8 @@ Page({
         isDragging: false, 
         draggingStudent: null, 
         dragStartSeat: null,
-        selectedSeat: null // 清除选中状态
+        selectedSeat: null, // 清除选中状态
+        selectedStudentTags: [] // 清除标签
       });
       return;
     }
@@ -852,19 +918,20 @@ Page({
     // 注意：如果是从座位拖拽到座位（交换），不需要更新待排列列表
     // 因为两个学生都在座位上，只是交换了位置
     
-    this.setData({
-      seatTable: newSeatTable,
-      unassignedStudents: newUnassignedStudents,
-      draggingStudent: null,
-      dragStartSeat: null,
-      isDragging: false,
-      selectedSeat: null, // 清除选中状态
-      seatStats: {
-        totalSeats: this.data.rows * this.data.cols,
-        usedSeats: newSeatTable.flat().filter(s => s).length,
-        emptySeats: this.data.rows * this.data.cols - newSeatTable.flat().filter(s => s).length
-  }
-});
+      this.setData({
+        seatTable: newSeatTable,
+        unassignedStudents: newUnassignedStudents,
+        draggingStudent: null,
+        dragStartSeat: null,
+        isDragging: false,
+        selectedSeat: null, // 清除选中状态
+        selectedStudentTags: [], // 清除标签
+        seatStats: {
+          totalSeats: this.data.rows * this.data.cols,
+          usedSeats: newSeatTable.flat().filter(s => s).length,
+          emptySeats: this.data.rows * this.data.cols - newSeatTable.flat().filter(s => s).length
+        }
+      });
 
     console.log('拖拽完成，座位表已更新');
   },

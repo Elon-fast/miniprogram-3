@@ -228,12 +228,19 @@
   touch-action: none;
   border: 2rpx solid;
   padding: 0 4rpx;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible; /* 允许浮层溢出 */
   white-space: nowrap;
   letter-spacing: 1rpx;
   text-shadow: 0 1rpx 1rpx rgba(0,0,0,0.05);
   box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+  position: relative; /* 用于定位浮层 */
+}
+
+.student-tag text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 /* 男生标签（蓝色） */
@@ -466,6 +473,10 @@
   width: 100%;
   white-space: nowrap;
   overflow-x: auto;
+  /* 确保垂直方向有空间显示浮层，不被裁剪 */
+  overflow-y: visible; 
+  padding-top: 60rpx; /* 为第一排的浮层预留空间 */
+  margin-top: -60rpx; /* 抵消 padding 带来的位置偏移 */
 }
 
 .seat-table {
@@ -473,6 +484,7 @@
   flex-direction: column;
   gap: 12rpx;
   min-width: max-content;
+  padding: 10rpx 10rpx 40rpx 10rpx; /* 增加四周内边距 */
 }
 
 .seat-row {
@@ -511,7 +523,7 @@
   box-sizing: border-box;
   flex-shrink: 0;
   position: relative;
-  overflow: hidden;
+  overflow: visible; /* 允许浮层溢出 */
   transition: all 0.2s ease-in-out;
   background-color: #fff;
 }
@@ -574,6 +586,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden; /* 裁剪内容 */
+  border-radius: 12rpx; /* 配合父元素的圆角 */
 }
 
 .seat-text {
@@ -639,7 +653,7 @@
   gap: 12rpx;
 }
 
-.info-content text {
+.info-content .info-text {
   font-size: 26rpx;
   color: #666;
   line-height: 1.6;
@@ -650,4 +664,68 @@
   padding: 100rpx 0;
   color: #999;
   font-size: 28rpx;
+}
+
+/* 学生信息浮层 */
+.student-info-tooltip {
+  position: absolute;
+  bottom: 115%; /* 稍微抬高一点，避免遮挡 */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.85);
+  padding: 12rpx 16rpx;
+  border-radius: 12rpx;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  width: max-content;
+  max-width: 300rpx;
+  z-index: 999; /* 确保在最上层 */
+  pointer-events: none; /* 防止遮挡点击 */
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
+}
+
+/* 第一排浮层显示在下方 */
+.student-info-tooltip.tooltip-bottom {
+  bottom: auto;
+  top: 115%;
+}
+
+.student-info-tooltip.tooltip-bottom::after {
+  top: auto;
+  bottom: 100%;
+  border-color: transparent transparent rgba(0, 0, 0, 0.85) transparent;
+}
+
+/* 浮层小三角 */
+.student-info-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -10rpx;
+  border-width: 10rpx;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent;
+}
+
+/* 标签样式 */
+.tooltip-tag {
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.tooltip-tag.green {
+  background-color: #52c41a; /* 绿色 */
+}
+
+.tooltip-tag.yellow {
+  background-color: #faad14; /* 黄色 */
+}
+
+.tooltip-tag.red {
+  background-color: #f5222d; /* 红色 */
 }

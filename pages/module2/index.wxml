@@ -57,6 +57,13 @@
                   <view class="seat-content seat-content-empty" wx:else>
                     <text class="seat-text seat-text-empty">空</text>
                   </view>
+                  
+                  <!-- 悬停/选中时显示的标签信息 -->
+                  <view class="student-info-tooltip {{rowIndex === 0 ? 'tooltip-bottom' : ''}}" wx:if="{{(selectedSeat && selectedSeat.row === rowIndex && selectedSeat.col === (group.startIndex + colIndex)) && selectedStudentTags.length > 0}}">
+                    <view class="tooltip-tag {{tag.type}}" wx:for="{{selectedStudentTags}}" wx:key="index" wx:for-item="tag">
+                      {{tag.text}}
+                    </view>
+                  </view>
                 </view>
               </view>
               <!-- 大组之间的间隙（最后一个大组后不显示） -->
@@ -80,6 +87,13 @@
           bindtap="onStudentClick"
         >
           <text>{{student.name}}</text>
+          
+          <!-- 悬停/选中时显示的标签信息 -->
+          <view class="student-info-tooltip" wx:if="{{(draggingStudent && draggingStudent.id === student.id && !dragStartSeat) && selectedStudentTags.length > 0}}">
+            <view class="tooltip-tag {{tag.type}}" wx:for="{{selectedStudentTags}}" wx:key="index" wx:for-item="tag">
+              {{tag.text}}
+            </view>
+          </view>
         </view>
       </view>
     </view>
@@ -191,12 +205,12 @@
     <view class="info-card">
       <view class="info-title">💡 排座说明</view>
       <view class="info-content">
-        <text wx:if="{{isCustomMode}}">• 自定义模式下，可以拖拽学生标签到座位进行排列</text>
-        <text wx:if="{{isCustomMode}}">• 可以拖拽座位中的学生到其他位置进行交换</text>
-        <text wx:if="{{isCustomMode}}">• 点击"自动排列"可将待排列学生自动分配到剩余座位</text>
-        <text wx:if="{{!isCustomMode}}">• 算法综合考虑学科互补、性格相容、避免干扰等因素</text>
-        <text wx:if="{{!isCustomMode}}">• 点击"重新生成"可生成不同的座位安排方案</text>
-        <text>• 空座位表示该位置未安排学生</text>
+        <text class="info-text" wx:if="{{isCustomMode}}">• 自定义模式下，可以拖拽学生标签到座位进行排列</text>
+        <text class="info-text" wx:if="{{isCustomMode}}">• 可以拖拽座位中的学生到其他位置进行交换</text>
+        <text class="info-text" wx:if="{{isCustomMode}}">• 点击"自动排列"可将待排列学生自动分配到剩余座位</text>
+        <text class="info-text" wx:if="{{!isCustomMode}}">• 算法综合考虑学科互补、性格相容、避免干扰等因素</text>
+        <text class="info-text" wx:if="{{!isCustomMode}}">• 点击"重新生成"可生成不同的座位安排方案</text>
+        <text class="info-text">• 空座位表示该位置未安排学生</text>
       </view>
     </view>
   </view>
