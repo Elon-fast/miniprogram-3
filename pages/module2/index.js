@@ -41,7 +41,10 @@ Page({
     },
     complementarityValue: '1.0', // 格式化后的显示值
     compatibilityValue: '1.0',
-    interferenceValue: '1.0'
+    interferenceValue: '1.0',
+    // 导出相关
+    canvasWidth: 375,
+    canvasHeight: 600
   },
 
   /**
@@ -759,7 +762,7 @@ Page({
     // 检查是否正在拖拽
     if (!this.data.isDragging || !this.data.draggingStudent) {
       return;
-    }
+      }
     
     const { row, col } = e.currentTarget.dataset;
     this.doDropToSeat(parseInt(row), parseInt(col));
@@ -860,9 +863,9 @@ Page({
         totalSeats: this.data.rows * this.data.cols,
         usedSeats: newSeatTable.flat().filter(s => s).length,
         emptySeats: this.data.rows * this.data.cols - newSeatTable.flat().filter(s => s).length
-      }
-    });
-    
+  }
+});
+
     console.log('拖拽完成，座位表已更新');
   },
 
@@ -895,6 +898,260 @@ Page({
    */
   stopPropagation() {
     // 阻止事件冒泡
+  },
+
+  /**
+   * 导出座位表
+   */
+  exportSeatingChart() {
+    wx.showModal({
+      title: '导出确认',
+      content: '是否将当前座位表导出为图片并保存到相册？',
+      success: (res) => {
+        if (res.confirm) {
+          this.drawAndSave();
+        }
+      }
+    });
+  },
+
+  /**
+   * 绘制并保存图片
+   */
+  drawAndSave() {
+    wx.showLoading({ title: '生成中...' });
+    
+    // 1. 计算尺寸
+    const { seatTable, rows, cols, groupData } = this.data;
+    
+    // 尺寸常量 (px) - 高清导出，使用较大尺寸
+    const cellWidth = 100;
+    const cellHeight = 70;
+    const gap = 10;
+    const groupGap = 30;
+    const padding = 40;
+    const headerHeight = 60; // 标题
+    const blackboardHeight = 80; // 黑板区域
+    const blackboardMargin = 40;
+    
+    // 计算总宽度
+    // 遍历每一行，计算该行所有组的宽度总和
+    let maxRowWidth = 0;
+    // 实际上每行结构是一样的，直接计算第一行即可（如果有数据）
+    if (groupData && groupData.length > 0) {
+      let currentRowWidth = 0;
+      groupData.forEach((group, index) => {
+        // 每个组的宽度 = 列数 * (单元格宽 + 间隙) - 最后一个间隙
+        const groupWidth = group.cols * (cellWidth + gap) - gap;
+        currentRowWidth += groupWidth;
+        
+        // 加上组间隙（除了最后一个组）
+        if (index < groupData.length - 1) {
+          currentRowWidth += groupGap;
+        }
+      });
+      maxRowWidth = currentRowWidth;
+    } else {
+      // 如果没有分组数据，按简单网格计算
+      maxRowWidth = cols * (cellWidth + gap) - gap;
+    }
+    
+    const canvasWidth = maxRowWidth + padding * 2;
+    const canvasHeight = padding + headerHeight + blackboardHeight + blackboardMargin + (rows * (cellHeight + gap)) + padding;
+    
+    // 更新Canvas尺寸
+    this.setData({
+      canvasWidth,
+      canvasHeight
+    }, () => {
+      // 等待DOM更新
+      setTimeout(() => {
+        const query = wx.createSelectorQuery();
+        query.select('#exportCanvas')
+          .fields({ node: true, size: true })
+          .exec((res) => {
+            if (!res[0] || !res[0].node) {
+              wx.hideLoading();
+              wx.showToast({ title: 'Canvas初始化失败', icon: 'none' });
+              return;
+            }
+            
+            const canvas = res[0].node;
+            const ctx = canvas.getContext('2d');
+            
+            // 处理DPR以保证清晰度
+            const dpr = wx.getSystemInfoSync().pixelRatio;
+            canvas.width = canvasWidth * dpr;
+            canvas.height = canvasHeight * dpr;
+            ctx.scale(dpr, dpr);
+            
+            // 2. 绘制背景
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            
+            // 3. 绘制标题
+            ctx.font = 'bold 32px sans-serif';
+            ctx.fillStyle = '#333333';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(`座位表 (${rows}行 × ${cols}列)`, canvasWidth / 2, padding + 20);
+            
+            // 4. 绘制黑板
+            const blackboardY = padding + headerHeight;
+            const blackboardW = 240;
+            const blackboardH = 50;
+            const blackboardX = (canvasWidth - blackboardW) / 2;
+            
+            // 黑板背景
+            ctx.fillStyle = '#333333';
+            this.roundRect(ctx, blackboardX, blackboardY, blackboardW, blackboardH, 6);
+            ctx.fill();
+            
+            // 黑板边框
+            ctx.strokeStyle = '#666666';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+            
+            // 黑板文字
+            ctx.font = '24px sans-serif';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText('黑板 / 讲台', canvasWidth / 2, blackboardY + blackboardH / 2);
+            
+            // 5. 绘制座位
+            const startY = blackboardY + blackboardH + blackboardMargin;
+            const startX = padding;
+            
+            ctx.lineWidth = 2;
+            
+            seatTable.forEach((row, rowIndex) => {
+              let currentX = startX;
+              
+              // 按组绘制
+              groupData.forEach((group, groupIndex) => {
+                for (let i = 0; i < group.cols; i++) {
+                  const colIndex = group.startIndex + i;
+                  const student = row[colIndex];
+                  const cellX = currentX;
+                  const cellY = startY + rowIndex * (cellHeight + gap);
+                  
+                  // 绘制单元格背景
+                  if (student) {
+                    // 已占用
+                    if (student.gender === 'female') {
+                      ctx.fillStyle = '#fff0f6'; // 女生背景
+                      ctx.strokeStyle = '#ffadd2'; // 女生边框
+                    } else {
+                      ctx.fillStyle = '#f0f5ff'; // 男生背景 (默认)
+                      ctx.strokeStyle = '#adc6ff'; // 男生边框
+                    }
+                  } else {
+                    // 空座位
+                    ctx.fillStyle = '#fafafa';
+                    ctx.strokeStyle = '#d9d9d9';
+                  }
+                  
+                  // 绘制圆角矩形
+                  ctx.beginPath();
+                  this.roundRect(ctx, cellX, cellY, cellWidth, cellHeight, 8);
+                  ctx.fill();
+                  
+                  // 绘制虚线边框 (如果是空座位)
+                  if (!student) {
+                    ctx.save();
+                    ctx.setLineDash([5, 5]);
+                    ctx.stroke();
+                    ctx.restore();
+                  } else {
+                    ctx.stroke();
+                  }
+                  
+                  // 绘制名字
+                  if (student) {
+                    ctx.font = 'bold 24px sans-serif';
+                    if (student.gender === 'female') {
+                      ctx.fillStyle = '#c41d7f';
+                    } else {
+                      ctx.fillStyle = '#1d39c4';
+                    }
+                    ctx.fillText(student.name, cellX + cellWidth / 2, cellY + cellHeight / 2);
+                  } else {
+                    ctx.font = '20px sans-serif';
+                    ctx.fillStyle = '#bfbfbf';
+                    ctx.fillText('空', cellX + cellWidth / 2, cellY + cellHeight / 2);
+                  }
+                  
+                  currentX += cellWidth + gap;
+                }
+                
+                // 组间隙
+                if (groupIndex < groupData.length - 1) {
+                  currentX += groupGap;
+                }
+              });
+            });
+            
+            // 6. 导出图片
+            wx.canvasToTempFilePath({
+              canvas,
+              success: (res) => {
+                this.saveImageToAlbum(res.tempFilePath);
+              },
+              fail: (err) => {
+                console.error('导出图片失败:', err);
+                wx.hideLoading();
+                wx.showToast({ title: '导出失败', icon: 'none' });
+              }
+            });
+          });
+      }, 500); // 稍微延时确保Canvas尺寸更新
+    });
+  },
+
+  /**
+   * 保存图片到相册
+   */
+  saveImageToAlbum(filePath) {
+    wx.saveImageToPhotosAlbum({
+      filePath,
+      success: () => {
+        wx.hideLoading();
+        wx.showToast({ title: '已保存到相册', icon: 'success' });
+      },
+      fail: (err) => {
+        console.error('保存相册失败:', err);
+        wx.hideLoading();
+        // 检查是否是权限问题
+        if (err.errMsg.includes('auth')) {
+          wx.showModal({
+            title: '权限不足',
+            content: '需要访问相册权限才能保存图片，请在设置中开启',
+            confirmText: '去设置',
+            success: (res) => {
+              if (res.confirm) {
+                wx.openSetting();
+              }
+            }
+          });
+        } else {
+          wx.showToast({ title: '保存失败', icon: 'none' });
+        }
+      }
+    });
+  },
+
+  /**
+   * Canvas绘制圆角矩形辅助方法
+   */
+  roundRect(ctx, x, y, w, h, r) {
+    if (w < 2 * r) r = w / 2;
+    if (h < 2 * r) r = h / 2;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
   },
 
   /**

@@ -29,6 +29,11 @@
 
     <!-- 座位表 -->
     <view class="seat-table-container">
+      <!-- 黑板指示器 -->
+      <view class="blackboard-indicator">
+        <view class="blackboard-content">黑板 / 讲台</view>
+      </view>
+      
       <view class="seat-table-title">座位表 ({{rows}}行 × {{cols}}列)</view>
       <scroll-view class="seat-table-scroll" scroll-x="true" enable-flex="true">
         <view class="seat-table">
@@ -87,6 +92,7 @@
       <view class="arrange-functions-buttons" wx:if="{{!isCustomMode}}">
         <button class="action-btn" bindtap="showCustomLayout" size="mini">自定义布局</button>
         <button class="action-btn" bindtap="reGenerate" size="mini">重新生成</button>
+        <button class="action-btn export-btn" bindtap="exportSeatingChart" size="mini">导出座位表</button>
       </view>
       
       <!-- 自定义模式：显示自定义布局、清空排列和自动排列按钮 -->
@@ -95,6 +101,7 @@
           <button class="action-btn" bindtap="showCustomLayout" size="mini">自定义布局</button>
           <button class="action-btn" bindtap="clearArrangement" size="mini">清空排列</button>
           <button class="action-btn" bindtap="autoArrange" size="mini">自动排列</button>
+          <button class="action-btn export-btn" bindtap="exportSeatingChart" size="mini">导出座位表</button>
         </view>
         
         <!-- 自定义排列因素（点击展开设置） -->
@@ -103,7 +110,7 @@
           <view class="dropdown-icon {{showAutoArrangeSettings ? 'expanded' : ''}}">▼</view>
         </view>
         
-        <!-- 自动排列设置面板 -->
+                <!-- 自动排列设置面板 -->
         <view class="auto-arrange-container">
           <view class="auto-arrange-settings {{showAutoArrangeSettings ? 'show' : ''}}" wx:if="{{showAutoArrangeSettings}}">
             <view class="settings-title">影响因子权重设置</view>
@@ -251,3 +258,6 @@
     </view>
   </view>
 </view>
+
+<!-- 隐藏的Canvas，用于生成图片 -->
+<canvas type="2d" id="exportCanvas" style="position:fixed; left:100%; top:0; width: {{canvasWidth}}px; height: {{canvasHeight}}px; opacity: 0; pointer-events: none;"></canvas>
