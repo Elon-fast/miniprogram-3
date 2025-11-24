@@ -41,6 +41,7 @@ App({
    */
   globalData: {
     userInfo: null,
-    currentClass: null // 当前选中的班级
+    currentClass: null, // 当前选中的班级
+    chatHistory: [] // AI 助手聊天记录 (全局共享)
   }
 })

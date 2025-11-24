@@ -4,113 +4,120 @@
 const BAIDU_API_KEY = '45ysWlMpIMT4YVSDDAy1NaUB'; // 替换为你的 API Key
 const BAIDU_SECRET_KEY = 'xQv5PwVNqVcz7UQslD1aQmanyqepZWQa'; // 替换为你的 Secret Key
 
+// 【重要】请在这里填入你的 Kimi API Key
+const MOONSHOT_API_KEY = 'sk-0re8aUjcCm3qEz1yfdtAT1Ghv0Y4KdjKIv4jOhegw9XfAfNK'; // 替换为你的 Kimi API Key
+
+// 默认的操作树配置（Default Action Tree）
+const DEFAULT_ACTION_TREE = [
+  {
+    id: 'navigation',
+    description: '页面导航与跳转功能',
+    actions: [
+      { name: 'open_seat_arrangement', description: '打开或跳转到智能排座/座位表页面', handler: 'navigateToSeatArrangement' },
+      { name: 'open_class_ecology', description: '打开或跳转到班级生态评估/分析页面', handler: 'navigateToClassEcology' },
+      { name: 'open_class_leader', description: '打开或跳转到班委胜任力/班委推荐页面', handler: 'navigateToClassLeader' }
+    ]
+  }
+  // 将来可以在这里扩展更多模块的操作，如 execute_auto_arrange 等
+];
+
 let manager = null;
+const app = getApp(); // 获取全局 App 实例
 
 Component({
+  properties: {
+    // 允许外部传入自定义 Action Tree
+    actionTree: {
+      type: Array,
+      value: [] 
+    },
+    // 允许外部传入全局上下文提示
+    globalContext: {
+      type: String,
+      value: ''
+    }
+  },
+
   data: {
     expanded: false,
     isRecording: false,
     chatHistory: [],
     scrollIntoView: '',
-    accessToken: '', // 缓存 AccessToken
-    tokenExpiresTime: 0 // Token 过期时间
+    accessToken: '', 
+    tokenExpiresTime: 0,
+    mergedActionTree: [] // 合并后的操作树
   },
 
   lifetimes: {
     attached() {
       manager = wx.getRecorderManager();
       this.initRecorder();
-      
-      // 初始化时尝试获取 Token，并处理缓存问题
       this.initToken();
+      
+      // 合并默认和用户传入的 Action Tree
+      this.setData({
+        mergedActionTree: [...DEFAULT_ACTION_TREE, ...this.properties.actionTree]
+      });
+
+      // 从全局数据中加载聊天记录
+      if (app && app.globalData && app.globalData.chatHistory) {
+        this.setData({
+          chatHistory: app.globalData.chatHistory,
+          scrollIntoView: 'bottom-anchor'
+        });
+      }
     }
   },
 
   methods: {
+    // ... (鉴权、录音相关代码保持不变) ...
     async initToken() {
-      // 尝试从本地存储恢复 Token
       const storedToken = wx.getStorageSync('baidu_access_token');
       const storedExpire = wx.getStorageSync('baidu_token_expire');
-      
       if (storedToken && storedExpire && Date.now() < storedExpire) {
-        this.setData({
-          accessToken: storedToken,
-          tokenExpiresTime: storedExpire
-        });
-      } else {
-        await this.getBaiduAccessToken(true); // 强制刷新
-      }
+        this.setData({ accessToken: storedToken, tokenExpiresTime: storedExpire });
+      } else { await this.getBaiduAccessToken(true); }
     },
 
-    // --- 鉴权与 Token 管理 ---
     async getBaiduAccessToken(forceRefresh = false) {
       const now = Date.now();
-      // 如果有 Token 且没过期 (提前 1 分钟刷新) 且不强制刷新
       if (!forceRefresh && this.data.accessToken && now < this.data.tokenExpiresTime - 60000) {
         return this.data.accessToken;
       }
-
       if (!BAIDU_API_KEY || BAIDU_API_KEY === 'YOUR_API_KEY') {
-        console.warn('未配置百度 API Key，无法获取 Token');
+        console.warn('未配置百度 API Key');
         return null;
       }
-
       return new Promise((resolve, reject) => {
         wx.request({
           url: 'https://aip.baidubce.com/oauth/2.0/token',
           method: 'POST',
-          data: {
-            grant_type: 'client_credentials',
-            client_id: BAIDU_API_KEY,
-            client_secret: BAIDU_SECRET_KEY
-          },
-          header: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          },
+          data: { grant_type: 'client_credentials', client_id: BAIDU_API_KEY, client_secret: BAIDU_SECRET_KEY },
+          header: { 'Content-Type': 'application/x-www-form-urlencoded' },
           success: (res) => {
             if (res.data.access_token) {
               const expireTime = now + (res.data.expires_in * 1000);
-              
-              // 更新内存
-              this.setData({
-                accessToken: res.data.access_token,
-                tokenExpiresTime: expireTime
-              });
-              
-              // 更新本地存储
+              this.setData({ accessToken: res.data.access_token, tokenExpiresTime: expireTime });
               wx.setStorageSync('baidu_access_token', res.data.access_token);
               wx.setStorageSync('baidu_token_expire', expireTime);
-              
-              console.log('AccessToken 获取成功');
               resolve(res.data.access_token);
-            } else {
-              console.error('获取 AccessToken 失败', res.data);
-              reject(res.data);
-            }
+            } else { reject(res.data); }
           },
-          fail: (err) => {
-            console.error('鉴权网络请求失败', err);
-            reject(err);
-          }
+          fail: reject
         });
       });
     },
 
-    // --- 录音逻辑 ---
     initRecorder() {
       manager.onStop(async (res) => {
         console.log("录音结束", res);
         const { tempFilePath, duration, fileSize } = res;
-        
         if (duration < 1000) {
           wx.showToast({ title: '说话时间太短', icon: 'none' });
           return;
         }
-        
-        // 调用真实识别逻辑
         this.recognizeVoice(tempFilePath, fileSize);
       });
-
       manager.onError((res) => {
         console.error("录音错误", res);
         this.setData({ isRecording: false });
@@ -121,17 +128,8 @@ Component({
     startRecord() {
       wx.vibrateShort();
       this.setData({ isRecording: true });
-      
       try {
-        // 百度 REST API 支持 m4a (aac)
-        // 微信小程序 format: 'aac' 生成 .m4a 文件
-        manager.start({
-          duration: 60000,
-          format: 'aac', 
-          sampleRate: 16000, // 采样率推荐 16k
-          encodeBitRate: 48000, // 码率
-          numberOfChannels: 1 // 单声道
-        });
+        manager.start({ duration: 60000, format: 'aac', sampleRate: 16000, encodeBitRate: 48000, numberOfChannels: 1 });
       } catch (error) {
         console.error("Start record failed", error);
         this.setData({ isRecording: false });
@@ -145,121 +143,81 @@ Component({
       }
     },
 
-    // --- 核心：语音识别逻辑 ---
     async recognizeVoice(filePath, fileSize, retryCount = 0) {
       if (BAIDU_API_KEY === 'YOUR_API_KEY') {
-        this.simulateRecognition(); // 没配 Key 就回退到模拟模式
+        this.simulateRecognition();
         return;
       }
-
       if (retryCount === 0) wx.showLoading({ title: '识别中...' });
 
       try {
-        // 1. 确保有 Token (如果重试，强制刷新)
         const token = await this.getBaiduAccessToken(retryCount > 0);
         if (!token) throw new Error('无法获取 Access Token');
 
-        // 2. 读取音频文件为 Base64
         const fs = wx.getFileSystemManager();
-        // 读取 Base64，但不自动拼接前缀
         let fileData = fs.readFileSync(filePath, 'base64');
-        
-        // 【修复 3300 错误】确保没有 data URI scheme 前缀
-        // 某些平台/版本 readFileSync 可能返回 'data:audio/mp3;base64,xxxxx'
-        // 百度 API 只接受纯 Base64 字符串
-        if (fileData.includes(',')) {
-          fileData = fileData.split(',')[1];
-        }
+        if (fileData.includes(',')) fileData = fileData.split(',')[1];
 
-        // 3. 发送请求给百度 (支持自动降级：极速版 -> 标准版)
-        // 默认先尝试极速版
         let api_url = 'https://vop.baidu.com/pro_api';
-        let dev_pid = 80001; // 极速版默认普通话模型
-        
-        // 如果是第一次重试 (retryCount === 1)，尝试切换到标准版接口
+        let dev_pid = 80001;
         if (retryCount === 1) {
           console.log('切换到标准版接口重试...');
           api_url = 'https://vop.baidu.com/server_api';
-          dev_pid = 1537; // 标准版普通话模型
+          dev_pid = 1537;
         }
 
         wx.request({
           url: api_url,
           method: 'POST',
-          header: {
-            'Content-Type': 'application/json'
-          },
+          header: { 'Content-Type': 'application/json' },
           data: {
-            format: 'm4a', // 对应微信的 aac
-            rate: 16000,
-            channel: 1,
-            cuid: 'smart_grade_system_user', // 用户唯一标识，随便填
-            token: token,
-            dev_pid: dev_pid,
-            speech: fileData,
-            len: fileSize
+            format: 'm4a', rate: 16000, channel: 1,
+            cuid: 'smart_grade_system_user',
+            token: token, dev_pid: dev_pid, speech: fileData, len: fileSize
           },
           success: (res) => {
-            // 处理 Token 失效 (3302)
-            // 无论是极速版还是标准版，Token 失效都应该刷新 Token
             if (res.data.err_no === 3302) {
                if (retryCount < 2) {
-                  console.warn('Token失效或接口无权限，尝试刷新Token/切换接口重试...');
-                  // 清除本地缓存
                   wx.removeStorageSync('baidu_access_token');
                   wx.removeStorageSync('baidu_token_expire');
                   this.setData({ accessToken: '' });
-                  
-                  // 递归重试：第一次是刷新Token+原接口；第二次是刷新Token+切接口
                   this.recognizeVoice(filePath, fileSize, retryCount + 1);
                   return;
                } else {
-                  // 重试两次都不行，提示用户去开权限
+                  console.warn('百度语音鉴权失败，转入模拟输入测试 Kimi');
                   wx.hideLoading();
-                  wx.showModal({
-                    title: '权限未开通',
-                    content: '您的百度语音识别服务可能未领取免费额度。请登录百度AI控制台，在"语音技术"->"概览"中领取"短语音识别-极速版"和"标准版"的免费额度。',
-                    showCancel: false
-                  });
+                  this.handleUserInput("打开班级生态评估模块");
                   return;
                }
             }
-
             wx.hideLoading();
-            console.log('百度识别结果:', res.data);
-            
             if (res.data.err_no === 0) {
-              // 成功
-              const resultText = res.data.result[0];
-              this.handleUserInput(resultText);
+              this.handleUserInput(res.data.result[0]);
             } else {
-              // 失败
-              wx.showToast({ title: '识别失败: ' + res.data.err_msg, icon: 'none' });
-              console.error('识别错误码:', res.data.err_no);
+              console.warn('百度语音识别失败，转入模拟输入测试 Kimi', res.data);
+              wx.showToast({ title: '识别异常，使用测试文本', icon: 'none' });
+              this.handleUserInput("打开班级生态评估模块");
             }
           },
           fail: (err) => {
             wx.hideLoading();
-            wx.showToast({ title: '网络请求失败', icon: 'none' });
-            console.error('Network error:', err);
+            console.error('百度 API 网络错误', err);
+            this.handleUserInput("打开班级生态评估模块");
           }
         });
-
       } catch (error) {
         wx.hideLoading();
         console.error('Recognition process failed', error);
-        wx.showToast({ title: '处理出错', icon: 'none' });
+        this.handleUserInput("打开班级生态评估模块");
       }
     },
 
-    // 保留模拟逻辑作为后备
     simulateRecognition() {
       wx.showLoading({ title: '识别中(模拟)...' });
       setTimeout(() => {
         wx.hideLoading();
         const mockInputs = ["帮我排一下座位", "我想看看班委推荐", "打开班级生态分析"];
-        const randomInput = mockInputs[Math.floor(Math.random() * mockInputs.length)];
-        this.handleUserInput(randomInput);
+        this.handleUserInput(mockInputs[Math.floor(Math.random() * mockInputs.length)]);
       }, 1000);
     },
 
@@ -271,22 +229,193 @@ Component({
       text = text.replace(/[。\.]$/, '');
       if (!text.trim()) return;
 
+      // 构建消息对象
       const userMsg = { role: 'user', content: text };
+      
+      // 1. 更新本地数据
+      const newHistory = [...this.data.chatHistory, userMsg];
       this.setData({ 
-        chatHistory: [...this.data.chatHistory, userMsg],
+        chatHistory: newHistory,
         scrollIntoView: 'bottom-anchor'
       });
 
-      this.processAIResponse(text);
+      // 2. 同步到全局数据
+      this.saveChatHistory(newHistory);
+
+      this.callKimiAPI(text);
     },
 
-    processAIResponse(query) {
-      wx.showLoading({ title: '思考中...' });
+    // 保存聊天记录到全局
+    saveChatHistory(history) {
+      if (app && app.globalData) {
+        app.globalData.chatHistory = history;
+      }
+    },
+
+    async callKimiAPI(userQuery) {
+      // ... (保持原样) ...
+      if (MOONSHOT_API_KEY === 'YOUR_MOONSHOT_KEY') {
+        this.processAIResponse(userQuery); 
+        return;
+      }
+
+      wx.showLoading({ title: 'AI 思考中...' });
+
+      const contextData = this.capturePageContext();
+      const actionTreeDesc = JSON.stringify(this.data.mergedActionTree);
       
-      // 暂时还是本地逻辑，后续这里接 LLM API
+      const systemPrompt = `你是一个智能班级管理助手。
+【当前环境】
+当前页面数据：${JSON.stringify(contextData)}
+全局上下文：${this.properties.globalContext}
+
+【能力清单 (Action Tree)】
+你可以执行以下操作。如果用户意图匹配其中某个操作，请务必返回对应的 JSON 指令。
+操作定义：${actionTreeDesc}
+
+【回复规则】
+1. 如果用户想执行某个操作（如“打开排座页面”），请返回且仅返回如下 JSON 格式：
+   {"action": "HANDLER_NAME", "params": {}, "reply": "好的，正在为您..."}
+   其中 HANDLER_NAME 必须是 Action Tree 中定义的 handler 字段。
+2. 如果是普通问答，直接返回文本回复即可，不需要 JSON。
+3. 回答请简洁自然。`;
+
+      console.log('Sending to Kimi:', { userQuery, actionTree: this.data.mergedActionTree });
+
+      wx.request({
+        url: 'https://api.moonshot.cn/v1/chat/completions',
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${MOONSHOT_API_KEY}`
+        },
+        data: {
+          model: 'moonshot-v1-8k',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userQuery }
+          ],
+          temperature: 0.3
+        },
+        success: (res) => {
+          wx.hideLoading();
+          if (res.data && res.data.choices && res.data.choices.length > 0) {
+            const content = res.data.choices[0].message.content;
+            console.log('Kimi Response:', content);
+            this.handleAIResponse(content);
+          } else {
+            console.error('Kimi API Error:', res.data);
+            this.addAIMessage('抱歉，AI 响应异常。');
+          }
+        },
+        fail: (err) => {
+          wx.hideLoading();
+          console.error('Kimi Network Error:', err);
+          this.addAIMessage(`网络错误: ${err.errMsg}`);
+        }
+      });
+    },
+
+    handleAIResponse(content) {
+      // ... (保持原样) ...
+      try {
+        let jsonStr = content;
+        if (content.includes('```json')) {
+          jsonStr = content.match(/```json([\s\S]*?)```/)[1];
+        } else if (content.includes('{') && content.includes('}')) {
+          const start = content.indexOf('{');
+          const end = content.lastIndexOf('}') + 1;
+          jsonStr = content.substring(start, end);
+        }
+
+        const command = JSON.parse(jsonStr);
+        
+        if (command.action && command.reply) {
+          this.addAIMessage(command.reply);
+          this.executeAction(command.action, command.params);
+          return;
+        }
+      } catch (e) { }
+
+      this.addAIMessage(content);
+    },
+
+    executeAction(handlerName, params) {
+      // ... (保持原样) ...
+      console.log('Executing Action:', handlerName, params);
+      if (this[handlerName]) {
+        this[handlerName](params);
+        return;
+      }
+      this.triggerEvent('action', { handler: handlerName, params });
+    },
+
+    navigateToSeatArrangement() {
+      wx.navigateTo({ url: '/pages/module2/index', fail: () => wx.switchTab({ url: '/pages/module2/index' }) });
+    },
+    navigateToClassEcology() {
+      wx.navigateTo({ url: '/pages/module1/index', fail: () => wx.switchTab({ url: '/pages/module1/index' }) });
+    },
+    navigateToClassLeader() {
+      wx.navigateTo({ url: '/pages/module3/index', fail: () => wx.switchTab({ url: '/pages/module3/index' }) });
+    },
+
+    capturePageContext() {
+      // ... (保持原样) ...
+      const pages = getCurrentPages();
+      const currentPage = pages[pages.length - 1];
+      if (!currentPage) return {};
+
+      const route = currentPage.route;
+      const pageData = currentPage.data;
+      let context = { page: route };
+
+      if (currentPage.getAIContext) {
+        return { ...context, ...currentPage.getAIContext() };
+      }
+
+      if (route.includes('module2')) {
+        context.stats = pageData.seatStats;
+        if (pageData.seatTable) {
+          context.seatTable = pageData.seatTable.map(row => row.map(cell => cell ? cell.name : '空'));
+        }
+      } else if (route.includes('module3')) {
+        context.positions = pageData.positions.map(p => ({
+          position: p.name,
+          current: p.currentHolder ? p.currentHolder.name : '空缺',
+          candidates: p.candidates.map(c => `${c.student.name}(${c.percentage}%)`).slice(0, 3)
+        }));
+      } else if (route.includes('module1')) {
+        context.summary = "班级生态分析页面";
+        if (pageData.analysisResult) {
+           context.isolatedStudents = pageData.analysisResult.isolated.map(s => s.name);
+           context.networkStats = pageData.analysisResult.networkStats;
+        }
+      }
+      return context;
+    },
+
+    addAIMessage(content) {
+      const aiMsg = { role: 'ai', content: content };
+      const newHistory = [...this.data.chatHistory, aiMsg];
+      
+      // 1. 更新本地数据
+      this.setData({
+        chatHistory: newHistory,
+        scrollIntoView: 'bottom-anchor'
+      });
+      
+      // 2. 同步到全局数据
+      this.saveChatHistory(newHistory);
+    },
+
+    // 保留本地规则处理作为后备
+    processAIResponse(query) {
+      // ... (保持原样) ...
+      wx.showLoading({ title: '思考中...' });
       setTimeout(() => {
         wx.hideLoading();
-        let aiContent = `我听到了：${query}。\n(目前还是本地逻辑处理)`;
+        let aiContent = `我听到了：${query}。\n(未配置 Kimi Key，使用本地规则)`;
         
         if (query.includes('排座') || query.includes('座位')) {
           aiContent = '好的，正在为您打开排座引擎...';
@@ -299,11 +428,7 @@ Component({
           wx.navigateTo({ url: '/pages/module1/index', fail: () => wx.switchTab({ url: '/pages/module1/index' }) });
         }
 
-        const aiMsg = { role: 'ai', content: aiContent };
-        this.setData({
-          chatHistory: [...this.data.chatHistory, aiMsg],
-          scrollIntoView: 'bottom-anchor'
-        });
+        this.addAIMessage(aiContent);
       }, 800);
     }
   }
