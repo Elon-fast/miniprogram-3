@@ -16,10 +16,10 @@ Page({
     
     // 用户信息
     userInfo: {
-      avatarUrl: '',
+      avatarUrl: '/images/teacher.png',
       nickName: '张老师' 
     },
-    hasUserInfo: false,
+    hasUserInfo: true,
     
     // 日期信息
     currentDate: '',

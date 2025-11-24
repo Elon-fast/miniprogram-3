@@ -12,7 +12,7 @@ export const mockClassList = [
 
 // Mock用户信息数据
 export const mockUserInfo = {
-  avatarUrl: 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0', // 默认头像URL
+  avatarUrl: '/images/teacher.png', // 默认头像URL
   nickName: '张老师'
 };
 
