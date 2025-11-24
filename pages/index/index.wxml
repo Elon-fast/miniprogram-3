@@ -1,58 +1,136 @@
 <!--index.wxml - 主页-->
 <view class="page-container">
-  <!-- 顶部：班级选择器 -->
-  <view class="class-selector-section">
-    <view class="section-title">选择班级</view>
-    <picker 
-      mode="selector" 
-      range="{{classList}}" 
-      value="{{currentClassIndex}}"
-      bindchange="onClassChange"
-      class="class-picker"
-    >
-      <view class="picker-content">
-        <text class="picker-label">{{currentClass || '请选择班级'}}</text>
-        <text class="picker-arrow">▼</text>
-      </view>
-    </picker>
-  </view>
+  <!-- 顶部背景装饰 -->
+  <view class="header-bg"></view>
 
-  <!-- 中部：用户信息展示区 -->
-  <view class="user-info-section">
-    <view class="section-title">教师信息</view>
-    <view class="user-card">
-      <image 
-        class="user-avatar" 
-        src="{{userInfo.avatarUrl}}" 
-        mode="aspectFill"
-        wx:if="{{hasUserInfo && userInfo.avatarUrl}}"
-      ></image>
-      <view class="user-avatar-placeholder" wx:else>
-        <text class="avatar-icon">👤</text>
+  <!-- 内容区域 -->
+  <view class="content-wrapper">
+    
+    <!-- 顶部导航栏区域 -->
+    <view class="top-bar">
+      <view class="date-info">
+        <text class="date">{{currentDate}}</text>
+        <text class="week">{{currentWeek}}</text>
       </view>
-      <view class="user-details">
-        <text class="user-name">{{userInfo.nickName || '未设置昵称'}}</text>
-        <text class="user-role">教师</text>
+      <view class="user-profile" bindtap="getUserProfile">
+        <text class="greeting">你好，{{userInfo.nickName}}</text>
+        <image 
+          class="avatar" 
+          src="{{userInfo.avatarUrl}}" 
+          mode="aspectFill"
+          wx:if="{{hasUserInfo && userInfo.avatarUrl}}"
+        ></image>
+        <view class="avatar-placeholder" wx:else>👤</view>
       </view>
     </view>
-  </view>
 
-  <!-- 下部：功能模块导航区 -->
-  <view class="modules-section">
-    <view class="section-title">功能模块</view>
-    <view class="modules-grid">
-      <view 
-        class="module-card" 
-        wx:for="{{modules}}" 
-        wx:key="id"
-        data-path="{{item.path}}"
-        bindtap="navigateToModule"
+    <!-- 班级选择卡片 (Header Card) -->
+    <view class="header-card">
+      <view class="header-title">当前管理班级</view>
+      <picker 
+        mode="selector" 
+        range="{{classList}}" 
+        value="{{currentClassIndex}}"
+        bindchange="onClassChange"
+        class="class-picker-box"
       >
-        <view class="module-icon">{{item.icon}}</view>
-        <text class="module-name">{{item.name}}</text>
-        <text class="module-desc">{{item.description}}</text>
+        <view class="picker-inner">
+          <text class="current-class">{{currentClass || '请选择班级'}}</text>
+          <view class="picker-action">
+            <text>切换</text>
+            <text class="arrow">></text>
+          </view>
+        </view>
+      </picker>
+    </view>
+
+    <!-- 数据仪表盘 (Dashboard) -->
+    <view class="section-container">
+      <view class="section-header">
+        <text class="title">今日概览</text>
+        <!-- <text class="more">查看更多</text> -->
+      </view>
+      <view class="dashboard-grid">
+        <view 
+          class="data-card" 
+          wx:for="{{dashboardData}}" 
+          wx:key="id"
+          bindtap="onDashboardItemClick"
+          data-type="{{item.type}}"
+        >
+          <view class="data-icon-box" style="background-color: {{item.color}}20; color: {{item.color}}">
+            {{item.icon}}
+          </view>
+          <view class="data-content">
+            <text class="data-value" style="color: {{item.color}}">{{item.value}}<text class="unit" wx:if="{{item.unit}}">{{item.unit}}</text></text>
+            <text class="data-title">{{item.title}}</text>
+          </view>
+        </view>
       </view>
     </view>
+
+    <!-- 核心功能模块 -->
+    <view class="section-container">
+      <view class="section-header">
+        <text class="title">核心功能</text>
+      </view>
+      <view class="modules-grid">
+        <view 
+          class="module-card" 
+          wx:for="{{modules}}" 
+          wx:key="id"
+          data-path="{{item.path}}"
+          bindtap="navigateToModule"
+          hover-class="module-card-hover"
+        >
+          <view class="module-icon-circle" style="background-color: {{item.bg}}; color: {{item.color}}">
+            {{item.icon}}
+          </view>
+          <view class="module-info">
+            <text class="module-name">{{item.name}}</text>
+            <text class="module-desc">{{item.description}}</text>
+          </view>
+          <view class="module-arrow" style="color: {{item.color}}">→</view>
+        </view>
+      </view>
+    </view>
+
+  </view>
+</view>
+
+<!-- 待办事项弹窗 -->
+<view class="modal-mask" wx:if="{{showTodoModal}}" bindtap="closeTodoModal">
+  <view class="modal-container" catchtap="catchTap">
+    <view class="modal-header">
+      <text class="modal-title">待办事项</text>
+      <view class="close-btn" bindtap="closeTodoModal">×</view>
+    </view>
+    
+    <view class="todo-input-row">
+      <input 
+        class="todo-input" 
+        placeholder="请输入新的待办..." 
+        value="{{todoInputValue}}"
+        bindinput="onTodoInput"
+        bindconfirm="addTodo"
+      />
+      <view class="add-btn" bindtap="addTodo">确定</view>
+    </view>
+
+    <scroll-view scroll-y class="todo-list">
+      <view class="todo-empty" wx:if="{{todoList.length === 0}}">
+        暂无待办事项
+      </view>
+      <block wx:for="{{todoList}}" wx:key="id">
+        <view class="todo-item {{item.completed ? 'completed' : ''}}">
+          <view class="todo-checkbox" bindtap="toggleTodo" data-index="{{index}}">
+            <view class="checkbox-inner" wx:if="{{item.completed}}">✔</view>
+          </view>
+          <text class="todo-text" bindtap="toggleTodo" data-index="{{index}}">{{item.text}}</text>
+          <view class="delete-btn" bindtap="deleteTodo" data-index="{{index}}">🗑️</view>
+        </view>
+      </block>
+    </scroll-view>
   </view>
 </view>
 
