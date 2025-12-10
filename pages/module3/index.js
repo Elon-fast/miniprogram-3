@@ -1,6 +1,6 @@
 // module3/index.js - 班委胜任力模型模块
 import { get } from '../../utils/api.js';
-import { evaluateStudentAbilities, LEADER_POSITIONS } from '../../utils/classLeaderRecommendation.js';
+import { calculateCadreSuitability, LEADER_POSITIONS } from '../../utils/classLeaderRecommendation.js';
 
 Page({
   /**
@@ -22,23 +22,19 @@ Page({
     editingPosition: {
       name: '',
       weights: {
-        leadership: 50,
-        responsibility: 50,
-        communication: 50,
-        academic: 0,
-        organization: 0
+        leadership: 35,
+        responsibility: 35,
+        communication: 15,
+        agreeableness: 15
       }
     },
     
-    // 能力维度选项
+    // 能力维度选项 (更新为新维度)
     abilityOptions: [
-      { key: 'leadership', name: '领导力' },
+      { key: 'leadership', name: '领导力潜质' },
       { key: 'responsibility', name: '责任心' },
-      { key: 'communication', name: '沟通力' },
-      { key: 'academic', name: '学习力' },
-      { key: 'organization', name: '组织力' },
-      { key: 'empathy', name: '同理心' },
-      { key: 'patience', name: '耐心' }
+      { key: 'communication', name: '外向性' },
+      { key: 'agreeableness', name: '宜人性' }
     ],
 
     // 任命相关
@@ -73,11 +69,8 @@ Page({
       id: `pos_${index}`,
       name: value.name,
       description: value.description,
-      // 将 0-1 的权重转换为 0-100 用于滑块显示
-      weights: Object.entries(value.requiredAbilities).reduce((acc, [k, v]) => {
-        acc[k] = v * 100;
-        return acc;
-      }, {}),
+      // 使用定义的权重
+      weights: value.requiredAbilities,
       candidates: [], // 将计算得出的候选人列表
       currentHolder: null // 现任班委
     }));
@@ -121,25 +114,13 @@ Page({
     const updatedPositions = positions.map(pos => {
       // 计算每个学生对该岗位的匹配度
       const candidates = students.map(student => {
-        const abilities = evaluateStudentAbilities(student);
-        let score = 0;
-        let totalWeight = 0;
-
-        // 根据权重计算加权平均分
-        Object.entries(pos.weights).forEach(([abilityKey, weight]) => {
-          const w = weight / 100; // 转换回 0-1
-          if (w > 0) {
-            score += (abilities[abilityKey] || 0) * w;
-            totalWeight += w;
-          }
-        });
-
-        const finalScore = totalWeight > 0 ? score / totalWeight : 0;
+        // 传入当前岗位的权重
+        const finalScore = calculateCadreSuitability(student, pos.weights);
         
         return {
           student: student,
           score: finalScore,
-          percentage: Math.round(finalScore * 100)
+          percentage: Math.round(finalScore)
         };
       });
 
@@ -165,11 +146,10 @@ Page({
         name: '',
         description: '自定义岗位',
         weights: {
-          leadership: 50,
-          responsibility: 50,
-          communication: 50,
-          academic: 0,
-          organization: 0
+          leadership: 25,
+          responsibility: 25,
+          communication: 25,
+          agreeableness: 25
         }
       }
     });

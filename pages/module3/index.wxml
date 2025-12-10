@@ -35,7 +35,7 @@
       </view>
 
       <view class="candidates-list">
-        <view class="candidate-item" wx:for="{{item.candidates}}" wx:key="student.id" wx:for-item="candidate" wx:for-index="idx">
+        <view class="candidate-item" wx:for="{{item.candidates}}" wx:key="idx" wx:for-item="candidate" wx:for-index="idx">
           <view class="candidate-rank rank-{{idx + 1}}">{{idx + 1}}</view>
           <view class="candidate-info">
             <text class="candidate-name">{{candidate.student.name}}</text>
@@ -70,15 +70,15 @@
         </view>
         
         <view class="form-item">
-          <text class="form-label">能力权重配置 (总和不限，自动归一化)</text>
+          <text class="form-label">能力权重配置 (请拖动调整比重)</text>
           <view class="weights-list">
             <view class="weight-item" wx:for="{{abilityOptions}}" wx:key="key">
               <view class="weight-header">
                 <text class="weight-name">{{item.name}}</text>
-                <text class="weight-value">{{editingPosition.weights[item.key]}}</text>
+                <text class="weight-value">{{editingPosition.weights[item.key]}}%</text>
               </view>
               <slider 
-                min="0" max="100" step="10" 
+                min="0" max="100" step="5" 
                 value="{{editingPosition.weights[item.key]}}" 
                 data-key="{{item.key}}" 
                 bindchange="onWeightChange"

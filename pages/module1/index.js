@@ -2,7 +2,7 @@
 import { get } from '../../utils/api.js';
 import { analyzeClassEcology } from '../../utils/socialNetworkAnalysis.js';
 import { buildGraphFromQuestionnaire } from '../../utils/networkGraphRenderer.js';
-import { assessClassPsychology, findConnectedComponents, analyzeAllGroups, assessStudentPsychology, SCL90_DIMENSIONS } from '../../utils/psychologicalAssessment.js';
+import { assessClassPsychology, findConnectedComponents, analyzeAllGroups, assessStudentPsychology, PERSONALITY_DIMENSIONS } from '../../utils/psychologicalAssessment.js';
 import * as echarts from '../../components/ec-canvas/echarts';
 
 Page({
@@ -190,14 +190,8 @@ Page({
         formatter: (params) => {
           if (params.dataType === 'node') {
             const nodeData = params.data;
-            return `
-              <div style="padding: 8px;">
-                <div style="font-weight: bold; margin-bottom: 6px; font-size: 14px;">${nodeData.name}</div>
-                <div style="margin-bottom: 4px;">连接数: ${nodeData.degree || 0}</div>
-                <div style="margin-bottom: 4px;">度中心性: ${((nodeData.degreeCentrality || 0) * 100).toFixed(1)}%</div>
-                <div>中介中心性: ${((nodeData.betweennessCentrality || 0) * 100).toFixed(1)}%</div>
-              </div>
-            `;
+            // ECharts在小程序端不支持HTML tooltip，改为纯文本换行
+            return `${nodeData.name}\n连接数: ${nodeData.degree || 0}\n度中心性: ${((nodeData.degreeCentrality || 0) * 100).toFixed(1)}%\n中介中心性: ${((nodeData.betweennessCentrality || 0) * 100).toFixed(1)}%`;
           }
           return '';
         }
@@ -223,11 +217,11 @@ Page({
         focusNodeAdjacency: true, // 鼠标悬停时高亮相邻节点
         selectedMode: 'single', // 允许选中节点
         force: {
-          repulsion: 300, // 节点之间的斥力（增大使节点分散）
-          gravity: 0.2, // 重力，防止节点飞出去
-          edgeLength: [50, 150], // 边的理想长度范围
-          layoutAnimation: true, // 布局动画
-          friction: 0.6 // 摩擦系数
+          repulsion: 400, // 大幅增加斥力 (原120 -> 400)，让节点分得更开
+          gravity: 0.05, // 进一步减小重力 (原0.1 -> 0.05)，允许节点利用更多空间
+          edgeLength: [100, 250], // 显著拉长边的长度 (原[60, 150] -> [100, 250])
+          layoutAnimation: true,
+          friction: 0.6
         },
         label: {
           show: true,
@@ -313,118 +307,88 @@ Page({
    */
   async loadAndAnalyzePsychology(graphData, analysisResult) {
     try {
-      // 1. 获取SCL-90心理测评数据
-      const scl90Res = await get('/api/module1/scl90');
-      if (scl90Res.code === 200 && scl90Res.data) {
+      // 1. 获取心理测评数据 (更新为新接口)
+      const psychologyRes = await get('/api/module1/psychology');
+      if (psychologyRes.code === 200 && psychologyRes.data) {
         // 2. 评估班级整体心理状态
-        const classPsychology = assessClassPsychology(scl90Res.data);
+        const classPsychology = assessClassPsychology(psychologyRes.data);
         
         // 3. 查找小团体（连通分量）
         const components = findConnectedComponents(graphData.nodes, graphData.edges);
         
         // 4. 分析每个小团体的心理状态
-        const groupAnalysis = analyzeAllGroups(components, scl90Res.data);
+        const groupAnalysis = analyzeAllGroups(components, psychologyRes.data);
         
         // 5. 筛选需要关注的小团体
-        const concernGroups = groupAnalysis.filter(group => group.needsAttention);
-        
-        // 6. 格式化数据（WXML不支持.toFixed()）
-        // 格式化班级整体心理状态，添加所有维度的均值
-        const dimensionList = Object.keys(SCL90_DIMENSIONS).map(key => ({
-          key: key,
-          name: SCL90_DIMENSIONS[key].name,
-          threshold: SCL90_DIMENSIONS[key].threshold,
-          average: classPsychology.dimensionAverages[key] || 0,
-          averageFormatted: (classPsychology.dimensionAverages[key] || 0).toFixed(2),
-          thresholdFormatted: SCL90_DIMENSIONS[key].threshold.toFixed(1),
-          status: (classPsychology.dimensionAverages[key] || 0) >= SCL90_DIMENSIONS[key].threshold ? '异常' : 
-                  (classPsychology.dimensionAverages[key] || 0) >= SCL90_DIMENSIONS[key].threshold * 0.8 ? '关注' : '正常'
+        const concernGroups = groupAnalysis.filter(group => group.needsAttention).map((group, index) => ({
+          ...group,
+          name: `小团体 ${index + 1}`, // 添加名称
+          members: group.studentNames // WXML使用的是item.members
         }));
         
-        const formattedClassPsychology = {
-          ...classPsychology,
-          concernDimensions: classPsychology.concernDimensions.map(dim => ({
-            ...dim,
-            scoreFormatted: dim.score.toFixed(2)
-          })),
-          dimensionList: dimensionList // 添加所有维度列表
-        };
-        
-        // 生成班级维度图表
-        const classDimensionsChartOption = this.createClassDimensionsChartOption(dimensionList);
-        
-        // 格式化学生心理数据，为每个学生添加详细的维度得分
-        const formattedStudentsData = scl90Res.data.map(student => {
-          const assessment = assessStudentPsychology(student.scl90Data || {});
-          const dimensionScores = Object.keys(SCL90_DIMENSIONS).map(key => {
-            const score = assessment.scores[key] || 0;
-            const threshold = SCL90_DIMENSIONS[key].threshold;
-            return {
-              key: key,
-              name: SCL90_DIMENSIONS[key].name,
-              score: score,
-              scoreFormatted: score.toFixed(2),
-              threshold: threshold,
-              thresholdFormatted: threshold.toFixed(1),
-              status: score >= threshold ? '异常' : score >= threshold * 0.8 ? '关注' : '正常'
-            };
-          });
+        // 6. 格式化数据
+        // 使用 PERSONALITY_DIMENSIONS 生成列表
+        const dimensionList = Object.keys(PERSONALITY_DIMENSIONS).map(key => {
+          const dim = PERSONALITY_DIMENSIONS[key];
+          const avgScore = classPsychology.personalityAverages[key] || 0;
+          
+          // 逻辑调整：只分“正常”和“需关注”
+          // 正面维度：低分(<60)需关注，高分(>=60)正常
+          let statusLabel = '正常';
+          if (avgScore < 60) statusLabel = '需关注';
+
+          return {
+            key: key,
+            name: dim.name,
+            threshold: dim.max,
+            average: avgScore,
+            averageFormatted: statusLabel, 
+            thresholdFormatted: String(dim.max),
+            status: avgScore < 60 ? '需关注' : '正常'
+          };
+        });
+
+        const formattedStudentsData = psychologyRes.data.map(student => {
+          // 传入新的 assessStudentPsychology
+          const assessment = assessStudentPsychology(student.psychologicalData || {});
           
           return {
             ...student,
             assessment: assessment,
-            dimensionScores: dimensionScores
+            // 维度分数用于详情展示
+            dimensionScores: Object.keys(assessment.personalityScores).map(k => {
+              const score = assessment.personalityScores[k];
+              // 逻辑调整：只分“正常”和“需关注”
+              let level = '正常';
+              if (score < 60) level = '需关注';
+              
+              return {
+                key: k,
+                score: score,
+                level: level, 
+                name: PERSONALITY_DIMENSIONS[k] ? PERSONALITY_DIMENSIONS[k].name : k
+              };
+            })
           };
         });
+
+        // 生成班级维度图表
+        const classDimensionsChartOption = this.createClassDimensionsChartOption(dimensionList);
         
-        const formattedGroupAnalysis = groupAnalysis.map((group, index) => {
-          // 为每个小团体添加学生详细信息
-          const groupStudents = formattedStudentsData.filter(s => group.nodeIds.includes(s.studentId));
-          
-          return {
-            ...group,
-            index: index + 1, // 添加索引
-            students: groupStudents, // 添加学生详细信息
-            problemDimensions: group.problemDimensions.map(prob => ({
-              ...prob,
-              scoreFormatted: prob.score.toFixed(2),
-              thresholdFormatted: prob.threshold.toFixed(1)
-            })),
-            reasonText: group.problemDimensions.length > 0 
-              ? `${group.problemDimensions[0].name}得分偏高，平均分${group.problemDimensions[0].score.toFixed(2)}，超过临界值${group.problemDimensions[0].threshold.toFixed(1)}`
-              : '整体心理状态需要关注'
-          };
-        });
-        
-        const formattedConcernGroups = concernGroups.map((group, index) => {
-          const groupStudents = formattedStudentsData.filter(s => group.nodeIds.includes(s.studentId));
-          
-          return {
-            ...group,
-            index: index + 1,
-            students: groupStudents, // 添加学生详细信息
-            problemDimensions: group.problemDimensions.map(prob => ({
-              ...prob,
-              scoreFormatted: prob.score.toFixed(2),
-              thresholdFormatted: prob.threshold.toFixed(1)
-            })),
-            reasonText: group.problemDimensions.length > 0 
-              ? `${group.problemDimensions[0].name}得分偏高，平均分${group.problemDimensions[0].score.toFixed(2)}，超过临界值${group.problemDimensions[0].threshold.toFixed(1)}`
-              : '整体心理状态需要关注'
-          };
-        });
-        
-        // 7. 为需要关注的小团体生成ECharts图表
+        // 生成心理状态图表（针对小团体）
         let psychologyChartOption = null;
-        if (formattedConcernGroups.length > 0) {
-          psychologyChartOption = this.createPsychologyChartOption(formattedConcernGroups);
+        if (concernGroups.length > 0) {
+          psychologyChartOption = this.createPsychologyChartOption(concernGroups);
         }
-        
+
         this.setData({
-          classPsychology: formattedClassPsychology,
-          groupAnalysis: formattedGroupAnalysis,
-          concernGroups: formattedConcernGroups,
-          studentsPsychologyData: formattedStudentsData, // 保存学生数据
+          classPsychology: {
+             ...classPsychology,
+             dimensionList: dimensionList
+          },
+          groupAnalysis: groupAnalysis,
+          concernGroups: concernGroups,
+          studentsPsychologyData: formattedStudentsData,
           ecPsychology: {
             onInit: psychologyChartOption ? (canvas, width, height, dpr) => {
               return this.initChart(canvas, width, height, dpr, psychologyChartOption);
@@ -438,8 +402,6 @@ Page({
         });
         
         console.log('班级心理状态评估完成:', classPsychology);
-        console.log('小团体分析完成:', groupAnalysis);
-        console.log('需要关注的小团体:', concernGroups);
       }
     } catch (error) {
       console.error('心理测评数据加载失败:', error);
@@ -494,7 +456,7 @@ Page({
         type: 'value',
         name: '得分',
         min: 0,
-        max: 3,
+        max: 100, // 调整为100分制
         axisLabel: {
           fontSize: 12
         }
@@ -513,7 +475,7 @@ Page({
           label: {
             show: true,
             position: 'top',
-            formatter: (params) => params.data.value.toFixed(2)
+            formatter: (params) => params.data.value.toFixed(1)
           }
         },
         {
@@ -529,7 +491,7 @@ Page({
           label: {
             show: true,
             position: 'top',
-            formatter: (params) => params.data.toFixed(1)
+            formatter: (params) => params.data.toFixed(0)
           }
         }
       ]
@@ -542,19 +504,15 @@ Page({
   createPsychologyChartOption(concernGroups) {
     // 准备数据：每个小团体的主要问题维度
     const seriesData = [];
-    const dimensions = [];
     
     concernGroups.forEach((group, index) => {
-      if (group.problemDimensions && group.problemDimensions.length > 0) {
-        const mainProblem = group.problemDimensions[0];
-        seriesData.push({
-          value: mainProblem.score,
-          name: `小团体${index + 1}`,
-          groupIndex: index,
-          groupInfo: group
-        });
-        dimensions.push(mainProblem.name);
-      }
+      // 由于没有具体的 problemDimensions，这里使用 concernLevel
+      seriesData.push({
+        value: group.concernLevel,
+        name: `小团体${index + 1}`,
+        groupIndex: index,
+        groupInfo: group
+      });
     });
     
     return {
@@ -568,12 +526,7 @@ Page({
           let html = `<div style="padding: 8px;"><div style="font-weight: bold; margin-bottom: 6px;">小团体${params.data.groupIndex + 1}</div>`;
           html += `<div style="margin-bottom: 4px;">成员: ${group.studentNames.join('、')}</div>`;
           html += `<div style="margin-bottom: 4px;">状态: ${group.groupStatus}</div>`;
-          if (group.problemDimensions && group.problemDimensions.length > 0) {
-            html += `<div style="margin-top: 8px; font-weight: bold;">问题维度:</div>`;
-            group.problemDimensions.forEach(prob => {
-              html += `<div style="margin-left: 8px;">• ${prob.name}: ${prob.score.toFixed(2)}</div>`;
-            });
-          }
+          html += `<div style="margin-bottom: 4px;">平均风险分: ${group.avgRisk.toFixed(2)}</div>`;
           html += `</div>`;
           return html;
         }
@@ -592,14 +545,14 @@ Page({
           value: item.value,
           name: `小团体${index + 1}`,
           itemStyle: {
-            color: item.value >= 2.0 ? '#ff4d4f' : item.value >= 1.5 ? '#faad14' : '#1890ff'
+            color: item.value >= 40 ? '#ff4d4f' : item.value >= 20 ? '#faad14' : '#1890ff'
           }
         })),
         label: {
           show: true,
           position: 'top',
           formatter: (params) => {
-            return params.data.value.toFixed(2);
+            return params.data.value.toFixed(1);
           }
         }
       }],
@@ -612,9 +565,9 @@ Page({
       },
       yAxis: {
         type: 'value',
-        name: '得分',
+        name: '风险分',
         min: 0,
-        max: 3,
+        max: 80, // 总分80
         axisLabel: {
           fontSize: 12
         }

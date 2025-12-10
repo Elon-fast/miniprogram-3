@@ -6,29 +6,15 @@
 
 import { 
   mockClassList, 
-  mockUserInfo, 
   mockModules, 
-  mockTestData,
-  mockQuestionnaireData,
-  mockStudentsForSeating,
-  mockInteractionHistory,
-  mockStudentsForLeader,
-  mockSCL90Data
+  mockInteractionHistory
 } from './mockData.js';
 import { generateSeatArrangement } from './seatArrangementAlgorithm.js';
-
-// 基础URL配置（开发阶段可为空，或配置Mock API基础路径）
-const BASE_URL = '';
+import { studentManager } from './studentManager.js';
 
 /**
  * 通用请求函数
  * @param {Object} options 请求配置对象
- * @param {String} options.url 请求地址
- * @param {String} options.method 请求方法，默认为GET
- * @param {Object} options.data 请求参数
- * @param {Object} options.header 请求头
- * @param {Boolean} options.showLoading 是否显示加载提示，默认为true
- * @returns {Promise} 返回Promise对象
  */
 function request(options = {}) {
   return new Promise((resolve, reject) => {
@@ -36,129 +22,126 @@ function request(options = {}) {
       url = '',
       method = 'GET',
       data = {},
-      header = {
-        'content-type': 'application/json'
-      },
+      header = { 'content-type': 'application/json' },
       showLoading = true
     } = options;
 
-    // 显示加载提示
     if (showLoading) {
-      wx.showLoading({
-        title: '加载中...',
-        mask: true
-      });
+      wx.showLoading({ title: '加载中...', mask: true });
     }
 
-    // 模拟异步延迟（模拟网络请求）
+    // 模拟异步延迟
     setTimeout(() => {
-      // 隐藏加载提示
       if (showLoading) {
         wx.hideLoading();
       }
 
-      // 根据不同的URL返回对应的Mock数据
-      // 这里可以根据实际需求扩展更多的Mock接口
       let mockResponse = null;
+      const allStudents = studentManager.getAll(); // 获取最新学生数据
+
+      // ---------------------------------------------------------
+      // 1. 通用接口
+      // ---------------------------------------------------------
 
       // 班级列表接口
       if (url.includes('/api/class/list') || url === '/api/class/list') {
+        mockResponse = { code: 200, message: 'success', data: mockClassList };
+      }
+      // 班级基本信息（人数等）- 用于首页 Dashboard
+      else if (url.includes('/api/class/info') || url === '/api/class/info') {
         mockResponse = {
           code: 200,
           message: 'success',
-          data: mockClassList
+           data: {
+             studentCount: allStudents.length,
+             className: '九年级一班', // 暂定
+             teacherName: '张老师'
+           }
         };
       }
       // 用户信息接口
       else if (url.includes('/api/user/info') || url === '/api/user/info') {
-        mockResponse = {
-          code: 200,
-          message: 'success',
-          data: mockUserInfo
-        };
+        mockResponse = { code: 200, message: 'success', data: studentManager.getUserInfo() };
       }
       // 功能模块列表接口
       else if (url.includes('/api/modules/list') || url === '/api/modules/list') {
-        mockResponse = {
-          code: 200,
-          message: 'success',
-          data: mockModules
-        };
+        mockResponse = { code: 200, message: 'success', data: mockModules };
       }
-      // 模块1测试数据接口
-      else if (url.includes('/api/module1/test') || url === '/api/module1/test') {
-        mockResponse = {
-          code: 200,
-          message: 'success',
-          data: mockTestData.module1
-        };
-      }
-      // 模块2测试数据接口
-      else if (url.includes('/api/module2/test') || url === '/api/module2/test') {
-        mockResponse = {
-          code: 200,
-          message: 'success',
-          data: mockTestData.module2
-        };
-      }
-      // 模块3测试数据接口
-      else if (url.includes('/api/module3/test') || url === '/api/module3/test') {
-        mockResponse = {
-          code: 200,
-          message: 'success',
-          data: mockTestData.module3
-        };
-      }
-      // 模块1：班级生态评估 - 问卷数据接口
+
+      // ---------------------------------------------------------
+      // 2. 模块1：班级生态评估
+      // ---------------------------------------------------------
+
+      // 问卷数据接口 (社交关系)
       else if (url.includes('/api/module1/questionnaire') || url === '/api/module1/questionnaire') {
-        mockResponse = {
-          code: 200,
-          message: 'success',
-          data: mockQuestionnaireData
-        };
+        const questionnaireData = allStudents.map(s => ({
+          studentId: s.id,
+          studentName: s.name,
+          friends: s.friends || []
+        }));
+        mockResponse = { code: 200, message: 'success', data: questionnaireData };
       }
-      // 模块1：班级生态评估 - 分析结果接口
+      // 分析结果接口
       else if (url.includes('/api/module1/analyze') || url === '/api/module1/analyze') {
-        // 这里返回分析结果（实际应该在后端计算，这里先用mock）
-        mockResponse = {
-          code: 200,
-          message: 'success',
-          data: { message: '分析结果将在后端计算' }
-        };
+        mockResponse = { code: 200, message: 'success', data: { message: '分析结果将在后端计算' } };
       }
-      // 模块1：SCL-90心理测评数据接口
-      else if (url.includes('/api/module1/scl90') || url === '/api/module1/scl90') {
-        mockResponse = {
-          code: 200,
-          message: 'success',
-          data: mockSCL90Data
-        };
+      // 心理测评数据接口 (新版 8+4 维度)
+      else if (url.includes('/api/module1/psychology') || url === '/api/module1/psychology') {
+        const psychologyData = allStudents.map(s => ({
+          studentId: s.id,
+          studentName: s.name,
+          // 如果没有新数据，回退到空对象，防止报错
+          psychologicalData: s.psychologicalData || {}
+        }));
+        mockResponse = { code: 200, message: 'success', data: psychologyData };
       }
-      // 模块2：智能排座 - 学生数据接口
+
+      // ---------------------------------------------------------
+      // 3. 模块2：智能排座
+      // ---------------------------------------------------------
+
+      // 学生数据接口
       else if (url.includes('/api/module2/students') || url === '/api/module2/students') {
-        mockResponse = {
-          code: 200,
-          message: 'success',
-          data: mockStudentsForSeating
-        };
+        const seatingStudents = allStudents.map(s => {
+           // 获取最新一次考试成绩
+           const lastExam = s.exams && s.exams.length > 0 ? s.exams[s.exams.length - 1] : { scores: {} };
+           return {
+             id: s.id,
+             name: s.name,
+             gender: s.gender,
+             roles: s.roles,
+             personality: s.personality,
+             scores: lastExam.scores,
+             socialScore: s.behaviorData ? s.behaviorData.interactionFrequency : 50,
+             // 确保 socialScore 有值，防止排座模块 undefined
+             tags: [] // 排座模块前端会生成 tags，这里可以为空
+           };
+        });
+        mockResponse = { code: 200, message: 'success', data: seatingStudents };
       }
-      // 模块2：智能排座 - 互动历史接口
+      // 互动历史接口 (保持静态Mock，或者如果有动态生成逻辑也可以加上)
       else if (url.includes('/api/module2/interactions') || url === '/api/module2/interactions') {
-        mockResponse = {
-          code: 200,
-          message: 'success',
-          data: mockInteractionHistory
-        };
+        mockResponse = { code: 200, message: 'success', data: mockInteractionHistory };
       }
-      // 模块2：智能排座 - 自动排列接口
+      // 自动排列接口
       else if (url.includes('/api/module2/autoArrange') || url === '/api/module2/autoArrange') {
-        // Mock自动排列接口
         setTimeout(() => {
-          // 这里应该调用后端算法，当前使用本地算法模拟
-          const { students, rows, cols, weights, interactionHistory, class: className } = data;
+          const { students: studentIds, rows, cols, weights, interactionHistory } = data;
+          // 从最新数据中获取完整的学生信息
+          const seatingStudents = allStudents.map(s => {
+             const lastExam = s.exams && s.exams.length > 0 ? s.exams[s.exams.length - 1] : { scores: {} };
+             return {
+               id: s.id,
+               name: s.name,
+               gender: s.gender,
+               roles: s.roles,
+               personality: s.personality,
+               scores: lastExam.scores,
+               socialScore: s.behaviorData ? s.behaviorData.interactionFrequency : 50
+             };
+          });
           
-          // 从students数组中获取完整的学生信息
-          const fullStudents = mockStudentsForSeating.filter(s => students.includes(s.id));
+          const fullStudents = seatingStudents.filter(s => studentIds.includes(s.id));
           
           const result = generateSeatArrangement(
             fullStudents,
@@ -166,144 +149,61 @@ function request(options = {}) {
             cols,
             {
               interactionHistory: interactionHistory || [],
-              weights: weights || {
-                complementarity: 1,
-                compatibility: 1,
-                interference: 1
-              }
+              weights: weights || { complementarity: 1, compatibility: 1, interference: 1 }
             }
           );
           
-          resolve({
-            code: 200,
-            message: '自动排列成功',
-            data: result
-          });
+          resolve({ code: 200, message: '自动排列成功', data: result });
         }, 800);
-        return; // 避免继续执行后续代码
-      }
-      else if (url.includes('/api/module2/arrange') || url === '/api/module2/arrange') {
-        mockResponse = {
-          code: 200,
-          message: 'success',
-          data: { message: '座位表将在前端计算' }
-        };
-      }
-      // 模块3：班委推荐 - 学生数据接口
-      else if (url.includes('/api/module3/students') || url === '/api/module3/students') {
-        mockResponse = {
-          code: 200,
-          message: 'success',
-          data: mockStudentsForLeader
-        };
-      }
-      // 模块3：班委推荐 - 推荐结果接口
-      else if (url.includes('/api/module3/recommend') || url === '/api/module3/recommend') {
-        mockResponse = {
-          code: 200,
-          message: 'success',
-          data: { message: '推荐结果将在前端计算' }
-        };
-      }
-      // 默认Mock响应
-      else {
-        mockResponse = {
-          code: 200,
-          message: 'success',
-          data: {}
-        };
+        return;
       }
 
-      // 模拟业务逻辑判断
-      if (mockResponse.code === 200) {
-        // 成功提示（可选，根据实际需求决定是否显示）
-        // wx.showToast({
-        //   title: '请求成功',
-        //   icon: 'success',
-        //   duration: 2000
-        // });
+      // ---------------------------------------------------------
+      // 4. 模块3：班委推荐
+      // ---------------------------------------------------------
+
+      // 学生数据接口
+      else if (url.includes('/api/module3/students') || url === '/api/module3/students') {
+        const leaderStudents = allStudents.map(s => ({
+          id: s.id,
+          name: s.name,
+          roles: s.roles,
+          behaviorData: s.behaviorData || {},
+          psychologicalData: s.psychologicalData || {}
+        }));
+        mockResponse = { code: 200, message: 'success', data: leaderStudents };
+      }
+
+      // ---------------------------------------------------------
+      // 5. 默认响应
+      // ---------------------------------------------------------
+      else {
+        mockResponse = { code: 200, message: 'success', data: {} };
+      }
+
+      // 统一返回处理
+      if (mockResponse && mockResponse.code === 200) {
         resolve(mockResponse);
       } else {
-        // 失败提示
-        wx.showToast({
-          title: mockResponse.message || '请求失败',
-          icon: 'none',
-          duration: 2000
-        });
+        wx.showToast({ title: mockResponse ? mockResponse.message : '请求失败', icon: 'none' });
         reject(mockResponse);
       }
-    }, 500); // 模拟500ms的网络延迟
-
-    // 真实网络请求代码（当前阶段注释，后续可启用）
-    /*
-    wx.request({
-      url: BASE_URL + url,
-      method: method,
-      data: data,
-      header: header,
-      success: (res) => {
-        if (showLoading) {
-          wx.hideLoading();
-        }
-        
-        // 业务逻辑判断
-        if (res.statusCode === 200 && res.data.code === 200) {
-          resolve(res.data);
-        } else {
-          wx.showToast({
-            title: res.data.message || '请求失败',
-            icon: 'none',
-            duration: 2000
-          });
-          reject(res.data);
-        }
-      },
-      fail: (err) => {
-        if (showLoading) {
-          wx.hideLoading();
-        }
-        wx.showToast({
-          title: '网络请求失败',
-          icon: 'none',
-          duration: 2000
-        });
-        reject(err);
-      }
-    });
-    */
+    }, 500);
   });
 }
 
 /**
  * GET请求封装
- * @param {String} url 请求地址
- * @param {Object} data 请求参数
- * @param {Object} options 其他配置选项
  */
 export function get(url, data = {}, options = {}) {
-  return request({
-    url,
-    method: 'GET',
-    data,
-    ...options
-  });
+  return request({ url, method: 'GET', data, ...options });
 }
 
 /**
  * POST请求封装
- * @param {String} url 请求地址
- * @param {Object} data 请求参数
- * @param {Object} options 其他配置选项
  */
 export function post(url, data = {}, options = {}) {
-  return request({
-    url,
-    method: 'POST',
-    data,
-    ...options
-  });
+  return request({ url, method: 'POST', data, ...options });
 }
 
-// 导出默认request函数
 export default request;
-

@@ -15,4 +15,4 @@ page {
 /* 清除默认样式 */
 view, text, button {
   box-sizing: border-box;
-}
+} 

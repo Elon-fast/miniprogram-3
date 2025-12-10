@@ -1,0 +1,58 @@
+<!--pages/admin/dataManager/index.wxml-->
+<view class="container">
+  <view class="header">
+    <text class="title">学生数据管理</text>
+    <text class="subtitle">开发模式：修改后需重启小程序生效或手动刷新</text>
+  </view>
+
+  <!-- 学生列表 -->
+  <view class="student-list">
+    <view 
+      class="student-item" 
+      wx:for="{{students}}" 
+      wx:key="id"
+      bindtap="editStudent"
+      data-id="{{item.id}}"
+    >
+      <view class="info">
+        <text class="name">{{item.name}}</text>
+        <text class="id">{{item.id}}</text>
+      </view>
+      <view class="edit-icon">✏️</view>
+    </view>
+  </view>
+
+  <!-- 编辑弹窗 -->
+  <view class="modal-mask" wx:if="{{showEditModal}}">
+    <view class="modal-content">
+      <view class="modal-header">
+        <text>编辑学生信息</text>
+      </view>
+      
+      <view class="form-item">
+        <text class="label">姓名</text>
+        <input class="input" value="{{editingStudent.name}}" data-field="name" bindinput="onInput" />
+      </view>
+
+      <view class="form-item">
+        <text class="label">性别</text>
+        <radio-group class="radio-group" bindchange="onGenderChange">
+          <radio value="male" checked="{{editingStudent.gender === 'male'}}">男</radio>
+          <radio value="female" checked="{{editingStudent.gender === 'female'}}">女</radio>
+        </radio-group>
+      </view>
+
+      <!-- 简单修改最近一次总分 -->
+      <view class="form-item">
+        <text class="label">期末总分</text>
+        <input class="input" type="number" value="{{editingScore}}" data-field="score" bindinput="onScoreInput" />
+      </view>
+
+      <view class="modal-footer">
+        <button class="btn cancel" bindtap="closeModal">取消</button>
+        <button class="btn confirm" bindtap="saveStudent">保存</button>
+      </view>
+    </view>
+  </view>
+</view>
+

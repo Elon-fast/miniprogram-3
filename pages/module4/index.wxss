@@ -1,0 +1,200 @@
+/** pages/module4/index.wxss **/
+.container {
+  padding: 20rpx;
+  min-height: 100vh;
+  background-color: #f5f7fa;
+  padding-bottom: 120rpx;
+}
+
+/* 建议区 */
+.suggestion-section {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.05);
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+
+.suggestion-swiper {
+  height: 80rpx;
+}
+
+.suggestion-card {
+  display: flex;
+  align-items: center;
+  padding: 10rpx 20rpx;
+  border-radius: 8rpx;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.suggestion-card.positive { background-color: #f6ffed; border: 1rpx solid #b7eb8f; }
+.suggestion-card.warning { background-color: #fffbe6; border: 1rpx solid #ffe58f; }
+.suggestion-card.info { background-color: #e6f7ff; border: 1rpx solid #91d5ff; }
+
+.suggestion-icon { margin-right: 12rpx; font-size: 32rpx; }
+.suggestion-text { font-size: 26rpx; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* 学生列表 */
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 20rpx;
+  padding: 0 10rpx;
+}
+
+.list-header .title { font-size: 32rpx; font-weight: bold; color: #333; }
+.list-header .subtitle { font-size: 24rpx; color: #999; }
+
+.student-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+}
+
+.student-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.05);
+  transition: all 0.2s;
+}
+
+.student-card:active { transform: scale(0.98); }
+
+.card-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  background: #1890ff;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-right: 20rpx;
+}
+
+.card-info { flex: 1; display: flex; flex-direction: column; }
+.card-info .name { font-size: 30rpx; font-weight: bold; color: #333; margin-bottom: 4rpx; }
+.card-info .roles { font-size: 22rpx; color: #1890ff; background: #e6f7ff; padding: 2rpx 8rpx; border-radius: 4rpx; align-self: flex-start; }
+
+.card-score { text-align: right; }
+.score-label { font-size: 20rpx; color: #999; display: block; }
+.score-num { font-size: 36rpx; font-weight: bold; color: #333; }
+
+/* 详情弹窗 */
+.detail-modal-mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.detail-modal {
+  width: 680rpx;
+  height: 85vh;
+  background: #fff;
+  border-radius: 24rpx;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 30rpx;
+  border-bottom: 1rpx solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-name { font-size: 36rpx; font-weight: bold; margin-right: 16rpx; }
+.modal-id { font-size: 24rpx; color: #999; }
+.close-btn { font-size: 44rpx; color: #999; padding: 0 10rpx; }
+
+.modal-content {
+  flex: 1;
+  height: 0;
+  width: 100%;
+  padding: 20rpx;
+  box-sizing: border-box;
+}
+
+.chart-container {
+  margin-bottom: 40rpx;
+  background: #fff;
+  border-radius: 12rpx;
+  padding: 10rpx;
+}
+
+.chart-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  padding-left: 16rpx;
+  border-left: 6rpx solid #1890ff;
+}
+
+.chart-box {
+  width: 100%;
+  height: 400rpx;
+}
+
+ec-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* 成绩列表网格 */
+.score-list-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20rpx;
+  padding: 10rpx;
+}
+
+.score-grid-item {
+  background: #f9f9f9;
+  border-radius: 8rpx;
+  padding: 16rpx;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.score-grid-item.fail {
+  background: #fff1f0;
+  border: 1rpx solid #ffa39e;
+}
+
+.subject-name {
+  font-size: 24rpx;
+  color: #666;
+  margin-bottom: 8rpx;
+}
+
+.subject-score {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.score-grid-item.fail .subject-score {
+  color: #f5222d;
+}

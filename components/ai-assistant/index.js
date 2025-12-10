@@ -8,21 +8,55 @@ const BAIDU_SECRET_KEY = 'xQv5PwVNqVcz7UQslD1aQmanyqepZWQa'; // 替换为你的 
 const MOONSHOT_API_KEY = 'sk-0re8aUjcCm3qEz1yfdtAT1Ghv0Y4KdjKIv4jOhegw9XfAfNK'; // 替换为你的 Kimi API Key
 
 // 默认的操作树配置（Default Action Tree）
+// 采用“页面即节点”的设计思路
 const DEFAULT_ACTION_TREE = [
   {
-    id: 'navigation',
-    description: '页面导航与跳转功能',
+    id: 'root',
+    name: '首页',
+    path: '/pages/index/index',
+    description: '小程序启动页，包含数据概览和模块入口',
     actions: [
-      { name: 'open_seat_arrangement', description: '打开或跳转到智能排座/座位表页面', handler: 'navigateToSeatArrangement' },
-      { name: 'open_class_ecology', description: '打开或跳转到班级生态评估/分析页面', handler: 'navigateToClassEcology' },
-      { name: 'open_class_leader', description: '打开或跳转到班委胜任力/班委推荐页面', handler: 'navigateToClassLeader' }
+      { name: 'open_module_1', description: '打开班级生态评估', handler: 'navigateToClassEcology' },
+      { name: 'open_module_2', description: '打开智能排座引擎', handler: 'navigateToSeatArrangement' },
+      { name: 'open_module_3', description: '打开班委胜任力模型', handler: 'navigateToClassLeader' },
+      { name: 'open_module_4', description: '打开学情概览', handler: 'navigateToModule4' }
+    ],
+    children: [
+      {
+        id: 'module1',
+        name: '班级生态评估',
+        path: '/pages/module1/index',
+        description: '展示班级社交网络图谱和心理健康状态',
+        actions: [
+          { name: 'refresh_analysis', description: '重新刷新分析数据', handler: 'refreshAnalysis' },
+          { name: 'show_help', description: '查看帮助说明', handler: 'showHelp' }
+        ]
+      },
+      {
+        id: 'module2',
+        name: '智能排座引擎',
+        path: '/pages/module2/index',
+        description: '进行座位编排和调整',
+        actions: [
+          { name: 'auto_arrange', description: '执行自动排座算法', handler: 'executeAutoArrange' },
+          { name: 'clear_seats', description: '清空当前座位表', handler: 'clearSeats' },
+          { name: 'save_seats', description: '保存当前座位方案', handler: 'saveSeats' }
+        ]
+      },
+      {
+        id: 'module3',
+        name: '班委胜任力模型',
+        path: '/pages/module3/index',
+        description: '推荐班委候选人',
+        actions: [
+          { name: 'view_candidate_detail', description: '查看候选人详细信息', handler: 'viewCandidateDetail' }
+        ]
+      }
     ]
   }
-  // 将来可以在这里扩展更多模块的操作，如 execute_auto_arrange 等
 ];
 
 let manager = null;
-const app = getApp(); // 获取全局 App 实例
 
 Component({
   properties: {
@@ -30,7 +64,7 @@ Component({
     actionTree: {
       type: Array,
       value: [] 
-    },
+    },                                                               
     // 允许外部传入全局上下文提示
     globalContext: {
       type: String,
@@ -59,17 +93,45 @@ Component({
         mergedActionTree: [...DEFAULT_ACTION_TREE, ...this.properties.actionTree]
       });
 
-      // 从全局数据中加载聊天记录
-      if (app && app.globalData && app.globalData.chatHistory) {
-        this.setData({
-          chatHistory: app.globalData.chatHistory,
-          scrollIntoView: 'bottom-anchor'
-        });
-      }
+      // 初始化加载数据
+      this.syncChatHistory();
+    }
+  },
+
+  // 监听页面显示，确保 Tab 切换时数据同步
+  pageLifetimes: {
+    show() {
+      this.syncChatHistory();
     }
   },
 
   methods: {
+    // 同步全局聊天记录
+    syncChatHistory() {
+      const app = getApp();
+      let history = [];
+      
+      if (app && app.globalData && app.globalData.chatHistory && app.globalData.chatHistory.length > 0) {
+        history = app.globalData.chatHistory;
+      } else {
+        // 尝试从本地缓存读取
+        history = wx.getStorageSync('chat_history_cache') || [];
+        // 如果本地有，反向同步给全局
+        if (history.length > 0 && app && app.globalData) {
+          app.globalData.chatHistory = history;
+        }
+      }
+
+      // 对比当前数据，避免不必要更新（使用长度简单判断，或者深比较）
+      if (this.data.chatHistory.length !== history.length || 
+          (history.length > 0 && history[history.length-1].content !== this.data.chatHistory[this.data.chatHistory.length-1]?.content)) {
+        this.setData({
+          chatHistory: history,
+          scrollIntoView: 'bottom-anchor'
+        });
+      }
+    },
+
     // ... (鉴权、录音相关代码保持不变) ...
     async initToken() {
       const storedToken = wx.getStorageSync('baidu_access_token');
@@ -247,9 +309,12 @@ Component({
 
     // 保存聊天记录到全局
     saveChatHistory(history) {
+      const app = getApp();
       if (app && app.globalData) {
         app.globalData.chatHistory = history;
       }
+      // 双重保险：写入本地缓存
+      wx.setStorageSync('chat_history_cache', history);
     },
 
     async callKimiAPI(userQuery) {
@@ -280,7 +345,7 @@ Component({
 2. 如果是普通问答，直接返回文本回复即可，不需要 JSON。
 3. 回答请简洁自然。`;
 
-      console.log('Sending to Kimi:', { userQuery, actionTree: this.data.mergedActionTree });
+      console.log('Sending to Kimi:', { userQuery, actionTree: this.data.mergedActionTree },systemPrompt);
 
       wx.request({
         url: 'https://api.moonshot.cn/v1/chat/completions',
@@ -359,9 +424,11 @@ Component({
     navigateToClassLeader() {
       wx.navigateTo({ url: '/pages/module3/index', fail: () => wx.switchTab({ url: '/pages/module3/index' }) });
     },
+    navigateToModule4() {
+      wx.navigateTo({ url: '/pages/module4/index', fail: () => wx.switchTab({ url: '/pages/module4/index' }) });
+    },
 
     capturePageContext() {
-      // ... (保持原样) ...
       const pages = getCurrentPages();
       const currentPage = pages[pages.length - 1];
       if (!currentPage) return {};

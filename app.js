@@ -9,7 +9,7 @@ App({
    */
   onLaunch() {
     console.log('Smart Grade System 启动');
-    
+
     // 登录（后续可对接真实登录接口）
     wx.login({
       success: res => {

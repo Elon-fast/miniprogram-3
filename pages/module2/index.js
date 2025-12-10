@@ -679,8 +679,13 @@ Page({
     // 3. 成绩相关 (优秀: 绿色, 较差: 红色)
     // 假设 > 90 为优秀，< 60 为较差
     if (fullStudent.scores) {
-      const subjects = { 'math': '数学', 'chinese': '语文', 'english': '英语', 'science': '科学' };
+      const subjects = { 
+        'math': '数学', 'chinese': '语文', 'english': '英语', 
+        'physics': '物理', 'chemistry': '化学', 'biology': '生物',
+        'history': '历史', 'geography': '地理', 'politics': '政治'
+      };
       Object.keys(fullStudent.scores).forEach(subject => {
+        if (!subjects[subject]) return; // 跳过未知科目
         const score = fullStudent.scores[subject];
         if (score > 90) {
           tags.push({ text: `${subjects[subject]}优`, type: 'green' });

@@ -195,7 +195,7 @@
 
 /* 图表卡片 */
 .graph-container {
-  height: 500rpx; /* 增加高度 */
+  height: 850rpx; /* 增加高度：原500rpx -> 850rpx，以便容纳37个节点的扩散 */
   background-color: #fafafa;
   border-radius: 16rpx;
   overflow: hidden;
@@ -516,12 +516,27 @@
   font-size: 28rpx;
   font-weight: 600;
   color: #333;
+  /* 增加弹性布局控制，防止名字过长 */
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 16rpx;
 }
 
 .dimension-detail-status-badge {
   padding: 6rpx 16rpx;
   border-radius: 8rpx;
   font-size: 24rpx;
+  /* 防止徽章被挤压或换行 */
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.dimension-detail-status-badge.success {
+  background-color: #f6ffed;
+  color: #52c41a;
+  border: 1rpx solid #b7eb8f;
 }
 
 .dimension-detail-status-badge.normal {
@@ -542,11 +557,29 @@
   border: 1rpx solid #ffccc7;
 }
 
+/* 辅导建议样式 */
+.suggestion-section {
+  margin-top: 30rpx;
+  padding-top: 30rpx;
+  border-top: 1px dashed #eee;
+}
+
+.suggestion-text {
+  font-size: 26rpx;
+  color: #4b5563;
+  line-height: 1.6;
+  background-color: #fffbeb;
+  padding: 20rpx;
+  border-radius: 12rpx;
+  border-left: 6rpx solid #f59e0b;
+}
+
 .dimension-detail-scores {
   display: flex;
   align-items: center;
   gap: 16rpx;
   font-size: 26rpx;
+  flex-wrap: wrap; /* 允许内容换行 */
 }
 
 .detail-score-label, .detail-threshold-label {

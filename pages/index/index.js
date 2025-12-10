@@ -30,7 +30,7 @@ Page({
     
     // 仪表盘数据
     dashboardData: [
-      { id: 1, type: 'student_count', title: '学生总数', value: '45', unit: '人', icon: '👨‍🎓', color: '#1890ff' },
+      { id: 1, type: 'student_count', title: '学生总数', value: '-', unit: '人', icon: '👨‍🎓', color: '#1890ff' },
       { id: 2, type: 'todo', title: '待处理', value: '0', unit: '项', icon: '📝', color: '#faad14' },
       { id: 3, type: 'meeting', title: '本周班会', value: '未设置', unit: '', icon: '📅', color: '#52c41a' }
     ],
@@ -47,6 +47,11 @@ Page({
   onLoad(options) {
     this.initDate();
     this.initData();
+  },
+
+  onShow() {
+    // 每次显示页面时刷新数据（如学生人数、待办事项）
+    this.updateDashboard();
   },
 
   /**
@@ -72,11 +77,30 @@ Page({
         this.loadUserInfo(),
         this.loadModules()
       ]);
-      // 加载本地存储的待办事项（过滤掉上次已标记完成的）
-      this.loadTodos(); 
     } catch (error) {
       console.error('页面数据初始化失败:', error);
     }
+  },
+
+  async updateDashboard() {
+    // 1. 更新学生总数
+    try {
+      const res = await get('/api/class/info');
+      if (res.code === 200 && res.data) {
+        const newData = this.data.dashboardData.map(item => {
+          if (item.type === 'student_count') {
+            return { ...item, value: String(res.data.studentCount) };
+          }
+          return item;
+        });
+        this.setData({ dashboardData: newData });
+      }
+    } catch (error) {
+      console.error('学生总数加载失败:', error);
+    }
+
+    // 2. 更新待办事项
+    this.loadTodos();
   },
 
   // --- 班级 & 用户 & 模块加载 ---
@@ -161,14 +185,13 @@ Page({
     }
   },
 
+  // --- 点击头像跳转到数据管理 ---
   getUserProfile() {
-    wx.getUserProfile({
-      desc: '用于完善用户资料',
-      success: (res) => {
-        this.setData({
-          userInfo: res.userInfo,
-          hasUserInfo: true
-        });
+    wx.navigateTo({
+      url: '/pages/admin/student-edit/index',
+      fail: (err) => {
+        console.error('Navigation failed:', err);
+        wx.showToast({ title: '功能暂未开放', icon: 'none' });
       }
     });
   },

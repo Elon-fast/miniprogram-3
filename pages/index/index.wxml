@@ -130,7 +130,7 @@
           <view class="delete-btn" bindtap="deleteTodo" data-index="{{index}}">🗑️</view>
         </view>
       </block>
-    </scroll-view>
+</scroll-view>
   </view>
 </view>
 

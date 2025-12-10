@@ -1,0 +1,102 @@
+<!--pages/module4/index.wxml-->
+<view class="container">
+  <!-- 1. 顶部：学情建议通知栏 -->
+  <view class="suggestion-section" wx:if="{{suggestions.length > 0}}">
+    <view class="section-title">📢 学情预警与建议</view>
+    <swiper class="suggestion-swiper" vertical autoplay circular interval="4000">
+      <block wx:for="{{suggestions}}" wx:key="index">
+        <swiper-item>
+        <view class="suggestion-card {{item.type}}">
+            <text class="suggestion-icon" wx:if="{{item.type === 'positive'}}">🏆</text>
+            <text class="suggestion-icon" wx:elif="{{item.type === 'warning'}}">⚠️</text>
+            <text class="suggestion-icon" wx:else>💡</text>
+            <text class="suggestion-text">{{item.content}}</text>
+        </view>
+      </swiper-item>
+      </block>
+    </swiper>
+  </view>
+
+  <!-- 2. 学生列表区 -->
+  <view class="student-list-section">
+    <view class="list-header">
+      <text class="title">学生名单 ({{studentList.length}}人)</text>
+      <text class="subtitle">点击卡片查看详细学情分析</text>
+    </view>
+    
+    <view class="student-grid">
+      <view 
+        class="student-card" 
+        wx:for="{{studentList}}" 
+        wx:key="id"
+        bindtap="showStudentDetail"
+        data-id="{{item.id}}"
+      >
+        <view class="card-avatar">{{item.name[0]}}</view>
+        <view class="card-info">
+            <text class="name">{{item.name}}</text>
+          <text class="roles" wx:if="{{item.roles.length > 0}}">{{item.roles[0]}}</text>
+        </view>
+        <view class="card-score">
+          <text class="score-label">最新总分</text>
+          <text class="score-num">{{item.lastTotal}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 3. 详情弹窗 -->
+  <view class="detail-modal-mask" wx:if="{{showDetail}}" bindtap="closeDetail">
+    <view class="detail-modal" catchtap="catchTap">
+      <view class="modal-header">
+        <view class="student-basic">
+          <text class="modal-name">{{currentStudent.name}}</text>
+          <text class="modal-id">学号: {{currentStudent.id}}</text>
+</view>
+      <view class="close-btn" bindtap="closeDetail">×</view>
+    </view>
+    
+      <scroll-view scroll-y class="modal-content">
+        <!-- 图表1: 总分趋势 -->
+      <view class="chart-container">
+          <view class="chart-title">总分波动趋势</view>
+        <view class="chart-box">
+            <ec-canvas id="total-score-chart" canvas-id="total-score-chart" ec="{{ ecTotal }}"></ec-canvas>
+          </view>
+        </view>
+
+        <!-- 图表2: 单科详情 (雷达图) -->
+        <view class="chart-container">
+          <view class="chart-title">各科成绩雷达图 (最新)</view>
+          <view class="chart-box">
+            <ec-canvas id="subject-radar-chart" canvas-id="subject-radar-chart" ec="{{ ecRadar }}"></ec-canvas>
+        </view>
+      </view>
+
+        <!-- 图表3: 主科趋势 -->
+        <view class="chart-container">
+          <view class="chart-title">主科趋势 (语数英)</view>
+          <view class="chart-box">
+            <ec-canvas id="main-subject-chart" canvas-id="main-subject-chart" ec="{{ ecMain }}"></ec-canvas>
+          </view>
+      </view>
+
+        <!-- 新增: 详细成绩列表 -->
+      <view class="chart-container">
+          <view class="chart-title">各科详细成绩 (最新)</view>
+          <view class="score-list-grid">
+            <block wx:for="{{subjectScores}}" wx:key="key">
+              <view class="score-grid-item {{item.score < 60 ? 'fail' : ''}}">
+                <text class="subject-name">{{item.name}}</text>
+                <text class="subject-score">{{item.score}}</text>
+              </view>
+            </block>
+          </view>
+        </view>
+
+      </scroll-view>
+      </view>
+  </view>
+</view>
+
+<ai-assistant />

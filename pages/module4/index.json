@@ -1,0 +1,7 @@
+{
+  "usingComponents": {
+    "ec-canvas": "/components/ec-canvas/ec-canvas",
+    "ai-assistant": "/components/ai-assistant/index"
+  },
+  "navigationBarTitleText": "学情概览"
+}

@@ -3,7 +3,9 @@
     "pages/index/index",
     "pages/module1/index",
     "pages/module2/index",
-    "pages/module3/index"
+    "pages/module3/index",
+    "pages/module4/index",
+    "pages/admin/student-edit/index"
   ],
   "window": {
     "navigationBarTextStyle": "black",

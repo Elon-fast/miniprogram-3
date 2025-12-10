@@ -1,0 +1,163 @@
+<!--pages/admin/student-edit/index.wxml-->
+<wxs module="utils">
+  function includes(arr, item) {
+    if (!arr) return false;
+    return arr.indexOf(item) > -1;
+  }
+  module.exports = {
+    includes: includes
+  };
+</wxs>
+
+<view class="container">
+  
+  <!-- 1. 列表视图 -->
+  <view class="list-view" wx:if="{{!isEditing}}">
+    <view class="header">
+      <text class="title">学生名单管理</text>
+      <view class="add-btn" bindtap="startAdd">＋ 新增学生</view>
+    </view>
+    
+    <scroll-view scroll-y class="student-list">
+      <view 
+        class="list-item" 
+        wx:for="{{students}}" 
+        wx:key="id"
+        bindtap="startEdit" 
+        data-id="{{item.id}}"
+      >
+        <view class="item-left">
+          <text class="name">{{item.name}}</text>
+          <text class="id">{{item.id}}</text>
+        </view>
+        <view class="item-right">
+          <text class="edit-icon">✎</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 2. 编辑视图 -->
+  <view class="edit-view" wx:else>
+    <view class="edit-header">
+      <text class="title">{{editingId ? '编辑学生' : '新增学生'}}</text>
+      <view class="back-btn" bindtap="cancelEdit">取消</view>
+    </view>
+
+    <scroll-view scroll-y class="form-container">
+      <!-- 基本信息 -->
+      <view class="form-section">
+        <view class="section-title">基本信息</view>
+        <view class="form-row">
+          <text class="label">姓名</text>
+          <input class="input" value="{{formData.name}}" bindinput="onInput" data-field="name" placeholder="请输入姓名"/>
+        </view>
+        <view class="form-row">
+          <text class="label">性别</text>
+          <radio-group bindchange="onGenderChange" class="radio-group">
+            <radio value="male" checked="{{formData.gender === 'male'}}">男</radio>
+            <radio value="female" checked="{{formData.gender === 'female'}}">女</radio>
+          </radio-group>
+        </view>
+      </view>
+
+      <!-- 职务设置 -->
+      <view class="form-section">
+        <view class="section-title">班委职务</view>
+        <checkbox-group bindchange="onRolesChange" class="roles-group">
+          <label class="checkbox-label" wx:for="{{candidateRoles}}" wx:key="*this">
+            <checkbox value="{{item}}" checked="{{utils.includes(formData.roles, item)}}"/>
+            {{item}}
+          </label>
+        </checkbox-group>
+      </view>
+
+      <!-- 成绩录入 -->
+      <view class="form-section">
+        <view class="section-title">最新考试成绩 (期末考试)</view>
+        <view class="scores-grid">
+          <block wx:for="{{subjectKeys}}" wx:key="key">
+            <view class="score-item">
+              <text class="score-label">{{item.name}}</text>
+              <input 
+                class="score-input" 
+                type="number" 
+                value="{{formData.scores[item.key]}}" 
+                bindinput="onScoreInput" 
+                data-key="{{item.key}}"
+              />
+            </view>
+          </block>
+        </view>
+      </view>
+
+      <!-- 心理测评数据 -->
+      <view class="form-section">
+        <view class="section-title">心理测评得分 (0-100)</view>
+        <view class="scores-grid">
+          <block wx:for="{{psychologicalKeys}}" wx:key="key">
+            <view class="score-item psy">
+              <text class="score-label">{{item.name}}</text>
+              <input 
+                class="score-input" 
+                type="number" 
+                value="{{formData.psychologicalData[item.key]}}" 
+                bindinput="onPsychologicalInput" 
+                data-key="{{item.key}}"
+              />
+            </view>
+          </block>
+        </view>
+      </view>
+
+      <!-- 社交关系 -->
+      <view class="form-section">
+        <view class="section-title">社交关系 (好友)</view>
+        <view class="friend-tip">请选择该学生的好友：</view>
+        
+        <!-- 搜索框 -->
+        <view class="search-box" style="margin-bottom: 20rpx; background: #f5f5f5; border-radius: 8rpx; padding: 10rpx 20rpx;">
+          <input 
+            class="search-input" 
+            placeholder="🔍 搜索姓名..." 
+            value="{{friendSearchKey}}"
+            bindinput="onFriendSearchInput"
+            style="font-size: 28rpx;"
+          />
+        </view>
+
+        <!-- 好友列表 (改为手动管理选中，支持搜索过滤) -->
+        <view class="friends-group" style="display: flex; flex-wrap: wrap;">
+          <block wx:for="{{filteredStudents}}" wx:key="id">
+            <!-- 排除自己 -->
+            <label 
+              class="friend-label" 
+              wx:if="{{item.id !== editingId}}" 
+              bindtap="toggleFriend" 
+              data-id="{{item.id}}"
+              style="display: inline-flex; align-items: center; margin-right: 20rpx; margin-bottom: 20rpx; padding: 10rpx 16rpx; background: #fff; border: 1rpx solid #ddd; border-radius: 30rpx; font-size: 26rpx; {{utils.includes(formData.friends, item.id) ? 'background: #e6f7ff; border-color: #1890ff; color: #1890ff;' : ''}}"
+            >
+              <!-- 隐藏原生 checkbox，完全自定义样式 -->
+              <view style="display: none;">
+                 <checkbox value="{{item.id}}" checked="{{utils.includes(formData.friends, item.id)}}"/>
+              </view>
+              <text>{{item.name}}</text>
+              <text wx:if="{{utils.includes(formData.friends, item.id)}}" style="margin-left: 6rpx;">✓</text>
+            </label>
+          </block>
+        </view>
+        
+        <!-- 如果搜索无结果 -->
+        <view wx:if="{{filteredStudents.length === 0}}" style="text-align: center; color: #999; font-size: 26rpx; padding: 20rpx;">
+          无搜索结果
+        </view>
+      </view>
+
+      <button class="save-btn" bindtap="saveStudent">保存修改</button>
+      <button class="delete-btn" wx:if="{{editingId}}" bindtap="deleteStudent">删除学生</button>
+      
+      <view class="spacer" style="height: 100rpx;"></view>
+    </scroll-view>
+  </view>
+
+</view>

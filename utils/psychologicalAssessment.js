@@ -1,172 +1,141 @@
 /**
- * 心理评估模块 - 基于SCL-90量表
- * 功能：评估班级整体心理状态和小团体的心理状况
+ * 心理评估模块
+ * 功能：基于“人格性格测试”与“情绪风险筛查”进行评估
  */
 
 /**
- * SCL-90量表维度定义
+ * 人格性格测试维度定义 (共8个)
  */
-export const SCL90_DIMENSIONS = {
-  somatization: { name: '躯体化', threshold: 1.5 },
-  obsessive: { name: '强迫症状', threshold: 1.5 },
-  interpersonal: { name: '人际关系敏感', threshold: 1.5 },
-  depression: { name: '抑郁', threshold: 1.5 },
-  anxiety: { name: '焦虑', threshold: 1.5 },
-  hostility: { name: '敌对', threshold: 1.5 },
-  phobic: { name: '恐怖', threshold: 1.5 },
-  paranoid: { name: '偏执', threshold: 1.5 },
-  psychotic: { name: '精神病性', threshold: 1.5 }
+export const PERSONALITY_DIMENSIONS = {
+  conscientiousness: { name: '责任心', max: 100, min: 0 },
+  extraversion: { name: '外向性', max: 100, min: 0 },
+  agreeableness: { name: '宜人性', max: 100, min: 0 },
+  emotionalStability: { name: '情绪稳定性', max: 100, min: 0 },
+  openness: { name: '开放性', max: 100, min: 0 },
+  leadership: { name: '领导力潜质', max: 100, min: 0 },
+  learningAttitude: { name: '学习态度', max: 100, min: 0 },
+  complementarity: { name: '性格互补', max: 100, min: 0 } // 改名 seatCompatibility -> complementarity
+};
+
+/**
+ * 风险筛查维度定义 (共4个)
+ * 满分：每题4分 x 5题 = 20分
+ */
+export const RISK_DIMENSIONS = {
+  studyPressure: { name: '学习压力', threshold: 10 }, // 单项满分20，设定10为关注线
+  anxiety: { name: '焦虑倾向', threshold: 10 },
+  depression: { name: '情绪低落', threshold: 10 },
+  socialPressure: { name: '社交压力', threshold: 10 }
 };
 
 /**
  * 评估单个学生的心理状态
- * @param {Object} scl90Data SCL-90量表数据
+ * @param {Object} rawData 原始测评数据 (psychologicalData)
  * @returns {Object} 评估结果
  */
-export function assessStudentPsychology(scl90Data) {
-  const scores = {};
-  const status = {};
+export function assessStudentPsychology(rawData) {
+  // 1. 人格性格维度处理
+  // rawData.personality 应包含 8 个维度的分数
+  const personalityScores = rawData.personality || {};
   
-  // 计算各维度得分
-  Object.keys(SCL90_DIMENSIONS).forEach(dimension => {
-    const dimensionData = scl90Data[dimension] || {};
-    const items = dimensionData.items || [];
-    
-    if (items.length > 0) {
-      // 计算平均分（SCL-90每题1-5分）
-      const avgScore = items.reduce((sum, score) => sum + score, 0) / items.length;
-      scores[dimension] = avgScore;
-      
-      // 判断状态（1.5分为临界值）
-      const threshold = SCL90_DIMENSIONS[dimension].threshold;
-      if (avgScore >= threshold) {
-        status[dimension] = '异常';
-      } else if (avgScore >= threshold * 0.8) {
-        status[dimension] = '关注';
-      } else {
-        status[dimension] = '正常';
-      }
-    } else {
-      scores[dimension] = 0;
-      status[dimension] = '正常';
-    }
-  });
+  // 2. 风险筛查处理
+  // rawData.risk 应包含 4 个维度 + totalScore
+  const riskScores = rawData.risk || { studyPressure: 0, anxiety: 0, depression: 0, socialPressure: 0, totalScore: 0 };
+  const totalRiskScore = riskScores.totalScore || 0;
   
-  // 计算总分和总均分
-  const totalScore = Object.values(scl90Data).reduce((sum, dim) => {
-    const items = dim.items || [];
-    return sum + items.reduce((s, score) => s + score, 0);
-  }, 0);
-  const totalAverage = totalScore / 90; // SCL-90共90题
+  // 判定风险等级
+  let riskLevel = '低风险';
+  let riskLabel = '正常';
+  let suggestion = '';
   
-  // 判断整体状态
-  let overallStatus = '正常';
-  if (totalAverage >= 2.0) {
-    overallStatus = '严重';
-  } else if (totalAverage >= 1.5) {
-    overallStatus = '异常';
-  } else if (totalAverage >= 1.2) {
-    overallStatus = '关注';
+  if (totalRiskScore <= 20) {
+    riskLevel = '低风险';
+    riskLabel = '正常';
+    suggestion = '学生目前整体情绪与压力状态良好。建议保持现有学习习惯，适当参与运动与社交活动。老师可继续给予正向反馈，维持良好关系。';
+  } else if (totalRiskScore <= 40) {
+    riskLevel = '轻度风险';
+    riskLabel = '需关注';
+    suggestion = '学生近期可能感受到学习或社交压力，建议老师多给予关心，适当减少负性评价，鼓励学生表达感受。若情况持续，可建议学生参与学校心理课程或与心理老师进行简短沟通。';
+  } else if (totalRiskScore <= 60) {
+    riskLevel = '中度风险';
+    riskLabel = '需干预';
+    suggestion = '学生可能存在较明显的压力或焦虑表现，如长期紧张、睡眠不佳、兴趣下降等。建议班主任与心理老师共同关注，适当安排个别谈话，了解学生压力来源。家长也应被温和告知学生的基本状况。';
+  } else {
+    riskLevel = '高度风险';
+    riskLabel = '高危';
+    suggestion = '系统检测到学生存在明显情绪困扰。强烈建议心理老师立即进行专业面谈。必要时联系家长共同协助学生。注意避免贴标签，强调支持与安全性。';
   }
-  
-  // 识别主要问题维度
-  const problemDimensions = Object.keys(scores)
-    .filter(dim => scores[dim] >= SCL90_DIMENSIONS[dim].threshold)
-    .map(dim => ({
-      dimension: dim,
-      name: SCL90_DIMENSIONS[dim].name,
-      score: scores[dim]
-    }))
-    .sort((a, b) => b.score - a.score);
-  
+
+  // 3. 识别主要风险维度
+  const highRiskDimensions = Object.keys(RISK_DIMENSIONS)
+    .filter(key => (riskScores[key] || 0) >= RISK_DIMENSIONS[key].threshold)
+    .map(key => ({
+      key,
+      name: RISK_DIMENSIONS[key].name,
+      score: riskScores[key]
+    }));
+
   return {
-    scores,
-    status,
-    totalScore,
-    totalAverage,
-    overallStatus,
-    problemDimensions
+    personalityScores,
+    riskScores,
+    totalRiskScore,
+    riskLevel,
+    riskLabel,
+    suggestion,
+    highRiskDimensions
   };
 }
 
 /**
  * 评估班级整体心理状态
- * @param {Array} studentsPsychologyData 所有学生的心理数据
+ * @param {Array} studentsPsychologyData 所有学生的心理数据 [{studentId, studentName, psychologicalData}]
  * @returns {Object} 班级整体评估结果
  */
 export function assessClassPsychology(studentsPsychologyData) {
-  const dimensionAverages = {};
-  const dimensionCounts = {};
+  // 1. 统计风险等级分布
+  const riskDistribution = {
+    low: 0,
+    mild: 0,
+    moderate: 0,
+    high: 0
+  };
   
-  // 初始化
-  Object.keys(SCL90_DIMENSIONS).forEach(dim => {
-    dimensionAverages[dim] = 0;
-    dimensionCounts[dim] = 0;
-  });
+  // 2. 计算人格维度班级平均分
+  const personalityAverages = {};
+  Object.keys(PERSONALITY_DIMENSIONS).forEach(key => personalityAverages[key] = 0);
   
-  // 汇总所有学生的数据
+  const studentCount = studentsPsychologyData.length;
+  
   studentsPsychologyData.forEach(student => {
-    const assessment = assessStudentPsychology(student.scl90Data || {});
-    Object.keys(SCL90_DIMENSIONS).forEach(dim => {
-      if (assessment.scores[dim] > 0) {
-        dimensionAverages[dim] += assessment.scores[dim];
-        dimensionCounts[dim]++;
-      }
+    // 注意：这里 student.psychologicalData 是我们在 api.js 里封装的
+    const assessment = assessStudentPsychology(student.psychologicalData || {});
+    
+    // 统计风险
+    if (assessment.totalRiskScore <= 20) riskDistribution.low++;
+    else if (assessment.totalRiskScore <= 40) riskDistribution.mild++;
+    else if (assessment.totalRiskScore <= 60) riskDistribution.moderate++;
+    else riskDistribution.high++;
+    
+    // 累加人格分
+    Object.keys(PERSONALITY_DIMENSIONS).forEach(key => {
+      personalityAverages[key] += (assessment.personalityScores[key] || 0);
     });
   });
   
-  // 计算平均值
-  Object.keys(SCL90_DIMENSIONS).forEach(dim => {
-    if (dimensionCounts[dim] > 0) {
-      dimensionAverages[dim] = dimensionAverages[dim] / dimensionCounts[dim];
-    }
-  });
-  
-  // 判断班级整体氛围
-  let classAtmosphere = '正常';
-  const atmosphereScore = {
-    normal: 0,
-    anxiety: dimensionAverages.anxiety || 0,
-    depression: dimensionAverages.depression || 0,
-    positive: 0
-  };
-  
-  // 计算积极指标（低分表示积极）
-  const positiveIndicators = ['anxiety', 'depression', 'hostility', 'interpersonal'];
-  const positiveScore = positiveIndicators.reduce((sum, dim) => {
-    return sum + (dimensionAverages[dim] || 0);
-  }, 0) / positiveIndicators.length;
-  
-  atmosphereScore.positive = Math.max(0, 2 - positiveScore); // 转换为积极分数
-  
-  // 判断主要氛围
-  if (atmosphereScore.anxiety >= 1.5) {
-    classAtmosphere = '焦虑倾向';
-  } else if (atmosphereScore.depression >= 1.5) {
-    classAtmosphere = '抑郁倾向';
-  } else if (positiveScore < 1.0) {
-    classAtmosphere = '阳光积极';
-  } else {
-    classAtmosphere = '正常';
+  // 计算平均
+  if (studentCount > 0) {
+    Object.keys(personalityAverages).forEach(key => {
+      personalityAverages[key] = Number((personalityAverages[key] / studentCount).toFixed(1));
+    });
   }
   
-  // 识别需要关注的维度
-  const concernDimensions = Object.keys(dimensionAverages)
-    .filter(dim => dimensionAverages[dim] >= SCL90_DIMENSIONS[dim].threshold)
-    .map(dim => ({
-      dimension: dim,
-      name: SCL90_DIMENSIONS[dim].name,
-      score: dimensionAverages[dim],
-      threshold: SCL90_DIMENSIONS[dim].threshold
-    }))
-    .sort((a, b) => b.score - a.score);
-  
   return {
-    dimensionAverages,
-    classAtmosphere,
-    atmosphereScore,
-    concernDimensions,
-    totalStudents: studentsPsychologyData.length
+    riskDistribution,
+    personalityAverages,
+    totalStudents: studentCount,
+    highRiskCount: riskDistribution.high + riskDistribution.moderate,
+    dimensionAverages: personalityAverages, // 兼容旧命名
+    concernDimensions: [] // 暂不计算关注维度
   };
 }
 
@@ -238,71 +207,49 @@ export function assessGroupPsychology(componentNodeIds, studentsPsychologyData) 
     componentNodeIds.includes(student.studentId)
   );
   
-  if (groupStudents.length === 0) {
+  // 过滤规则：剔除人数少于2人或多于4人的团体 (误判/非典型小团体)
+  if (groupStudents.length < 2 || groupStudents.length > 4) {
     return null;
   }
   
-  // 评估每个学生的心理状态
-  const studentAssessments = groupStudents.map(student => ({
-    studentId: student.studentId,
-    studentName: student.studentName,
-    assessment: assessStudentPsychology(student.scl90Data || {})
-  }));
+  // 计算小团体的平均风险分
+  let totalGroupRisk = 0;
   
-  // 计算小团体平均分
-  const groupDimensionAverages = {};
-  Object.keys(SCL90_DIMENSIONS).forEach(dim => {
-    const scores = studentAssessments
-      .map(s => s.assessment.scores[dim] || 0)
-      .filter(score => score > 0);
-    if (scores.length > 0) {
-      groupDimensionAverages[dim] = scores.reduce((sum, s) => sum + s, 0) / scores.length;
-    } else {
-      groupDimensionAverages[dim] = 0;
-    }
+  const studentAssessments = groupStudents.map(student => {
+    const assessment = assessStudentPsychology(student.psychologicalData || {});
+    totalGroupRisk += assessment.totalRiskScore;
+    return {
+      studentId: student.studentId,
+      studentName: student.studentName,
+      assessment
+    };
   });
   
-  // 识别问题维度
-  const problemDimensions = Object.keys(groupDimensionAverages)
-    .filter(dim => groupDimensionAverages[dim] >= SCL90_DIMENSIONS[dim].threshold)
-    .map(dim => ({
-      dimension: dim,
-      name: SCL90_DIMENSIONS[dim].name,
-      score: groupDimensionAverages[dim],
-      threshold: SCL90_DIMENSIONS[dim].threshold
-    }))
-    .sort((a, b) => b.score - a.score);
+  const avgRisk = totalGroupRisk / groupStudents.length;
   
   // 判断小团体整体状态
   let groupStatus = '正常';
-  const avgAnxiety = groupDimensionAverages.anxiety || 0;
-  const avgDepression = groupDimensionAverages.depression || 0;
-  const avgInterpersonal = groupDimensionAverages.interpersonal || 0;
+  let needsAttention = false;
   
-  if (avgAnxiety >= 1.5) {
-    groupStatus = '焦虑偏高';
-  } else if (avgDepression >= 1.5) {
-    groupStatus = '抑郁倾向';
-  } else if (avgInterpersonal >= 1.5) {
-    groupStatus = '人际关系敏感';
-  } else if (problemDimensions.length > 0) {
-    groupStatus = '需要关注';
+  // 小团体如果有2人以上高风险，或者平均分高，则预警
+  const highRiskCount = studentAssessments.filter(s => s.assessment.totalRiskScore > 40).length;
+  
+  if (avgRisk > 40 || highRiskCount >= 2) {
+    groupStatus = '高风险群体';
+    needsAttention = true;
+  } else if (avgRisk > 20) {
+    groupStatus = '轻度风险';
   }
-  
-  // 计算关注度（问题维度数量和严重程度）
-  const concernLevel = problemDimensions.length > 0 ? 
-    Math.min(100, problemDimensions.length * 20 + problemDimensions[0].score * 20) : 0;
   
   return {
     nodeIds: componentNodeIds,
     studentCount: groupStudents.length,
     studentNames: groupStudents.map(s => s.studentName),
-    studentAssessments,
-    dimensionAverages: groupDimensionAverages,
-    problemDimensions,
+    avgRisk,
     groupStatus,
-    concernLevel,
-    needsAttention: problemDimensions.length > 0 || concernLevel > 30
+    needsAttention,
+    concernLevel: avgRisk,
+    problemDimensions: [] // 暂不详细分析小团体具体维度
   };
 }
 
@@ -318,4 +265,3 @@ export function analyzeAllGroups(components, studentsPsychologyData) {
     .filter(result => result !== null)
     .sort((a, b) => b.concernLevel - a.concernLevel); // 按关注度排序
 }
-

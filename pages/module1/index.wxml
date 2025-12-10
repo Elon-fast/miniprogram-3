@@ -110,7 +110,7 @@
         <view class="atmosphere-container">
           <view class="atmosphere-label">整体氛围</view>
           <view class="atmosphere-badge {{classPsychology.classAtmosphere === '正常' ? 'normal' : classPsychology.classAtmosphere === '阳光积极' ? 'positive' : 'concern'}}">
-            {{classPsychology.classAtmosphere}}
+            {{classPsychology.classAtmosphere || '正常'}}
           </view>
         </view>
         
@@ -136,18 +136,15 @@
         <view class="dimensions-list">
           <view class="list-header">
             <text>维度名称</text>
-            <text>班级均值</text>
-            <text>合理区间</text>
+            <text>班级状态</text>
           </view>
           <view class="dimension-item" wx:for="{{classPsychology.dimensionList}}" wx:key="key">
             <view class="dimension-info">
               <text class="dimension-name">{{item.name}}</text>
             </view>
             <view class="dimension-value">
-              <text class="score {{item.status === 'concern' ? 'concern' : ''}}">{{item.averageFormatted}}</text>
-            </view>
-            <view class="dimension-range">
-              <text class="range-text">1.0 - 2.5</text>
+              <!-- 显示文字状态，而非具体分数 -->
+              <text class="score {{item.status === '需关注' ? 'concern' : ''}}">{{item.averageFormatted}}</text>
             </view>
           </view>
         </view>
@@ -187,7 +184,7 @@
         <text class="modal-title">{{selectedStudent.name}} - 详细报告</text>
         <text class="modal-close" bindtap="closeStudentDetail">×</text>
       </view>
-      <view class="modal-body">
+      <scroll-view scroll-y class="modal-body">
         <!-- 社交角色分析 (新增) -->
         <view class="social-analysis-section" wx:if="{{selectedStudent.socialStats && selectedStudent.socialStats.length > 0}}">
           <view class="section-subtitle">社交角色分析</view>
@@ -200,28 +197,33 @@
           </view>
         </view>
 
-        <!-- 心理维度得分 -->
+        <!-- 心理维度评估 -->
         <view class="student-dimensions">
           <view class="section-subtitle">心理维度评估</view>
           <view class="dimension-detail-item" wx:for="{{selectedStudent.dimensionScores}}" wx:key="key">
             <view class="dimension-detail-header">
               <text class="dimension-detail-name">{{item.name}}</text>
-              <view class="dimension-detail-status-badge {{item.status === '正常' ? 'normal' : item.status === '关注' ? 'warning' : 'danger'}}">
-                {{item.status}}
+              <!-- 徽章显示 -->
+              <view class="dimension-detail-status-badge {{item.level === '需关注' ? 'warning' : item.level === '优秀' ? 'success' : 'normal'}}">
+                {{item.level}}
               </view>
             </view>
-            <view class="dimension-detail-scores">
-              <text class="detail-score-label">得分:</text>
-              <text class="detail-score-value">{{item.scoreFormatted}}</text>
-              <text class="detail-threshold-label">参考值:</text>
-              <text class="detail-threshold-value">{{item.thresholdFormatted}}</text>
-            </view>
+          </view>
+          
+          <view wx:if="{{!selectedStudent.dimensionScores || selectedStudent.dimensionScores.length === 0}}" class="empty-text">
+            暂无详细测评数据
           </view>
         </view>
-        <view wx:if="{{!selectedStudent.dimensionScores || selectedStudent.dimensionScores.length === 0}}" class="empty">
-          暂无详细测评数据
+
+        <!-- 个性化建议 (新增) -->
+        <view class="suggestion-section" wx:if="{{selectedStudent.assessment && selectedStudent.assessment.suggestion}}">
+          <view class="section-subtitle">💡 辅导建议</view>
+          <view class="suggestion-text">
+            {{selectedStudent.assessment.suggestion}}
+          </view>
         </view>
-      </view>
+
+      </scroll-view>
     </view>
   </view>
 
